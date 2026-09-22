@@ -280,6 +280,9 @@
                     <Button x:Name="SettingsButton" Content="Settings" Style="{StaticResource QuietButtonStyle}"
                             Click="SettingsButton_Click" HorizontalContentAlignment="Left"
                             Padding="14,9" Margin="12,4,12,0" AutomationProperties.Name="Open settings" />
+                    <Button x:Name="HistoryButton" Content="Session history" Style="{StaticResource QuietButtonStyle}"
+                            Click="HistoryButton_Click" HorizontalContentAlignment="Left"
+                            Padding="14,9" Margin="12,4,12,0" AutomationProperties.Name="Open session history" />
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="18,0,18,20">
@@ -323,6 +326,8 @@
                                FontSize="13" Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="History" Style="{StaticResource QuietButtonStyle}" Click="HistoryButton_Click"
+                            Margin="0,0,8,0" AutomationProperties.Name="Open session history" />
                     <Button x:Name="HeaderSettingsButton" Content="Settings"
                             Style="{StaticResource QuietButtonStyle}" Click="SettingsButton_Click"
                             Margin="0,0,8,0" AutomationProperties.Name="Open settings" />
@@ -465,13 +470,23 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="CURRENT RATE" Width="1.7*">
+                                <DataGridTemplateColumn Header="CURRENT RATE" Width="1.55*">
                                     <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                             <TextBlock Text="{Binding TrafficSummary}" FontSize="11"
                                                        Foreground="{StaticResource InkBrush}"
                                                        VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0"
                                                        ToolTip="Current observed download and upload rate for this client" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="THIS SESSION" Width="1.55*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SessionTrafficSummary}" FontSize="11"
+                                                       Foreground="{StaticResource InkBrush}"
+                                                       VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0"
+                                                       ToolTip="Cumulative download and upload traffic observed since this session started" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -488,7 +503,7 @@
                                                            VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0" />
                                                 <Button Grid.Column="1" IsEnabled="{Binding CanConfigure}"
                                                         Click="ConfigureDeviceButton_Click"
-                                                        ToolTip="Set temporary upload and download limits or block routed IPv4 traffic."
+                                                        ToolTip="Set temporary limits or block traffic. The current PC uses Windows local policy."
                                                         Style="{StaticResource DeviceControlButtonStyle}" FontSize="11"
                                                         Padding="9,6" Margin="5,0" />
                                             </Grid>

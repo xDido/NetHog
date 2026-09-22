@@ -18,6 +18,7 @@ public partial class SettingsWindow : Window
         DataUnitComboBox.SelectedIndex = settings.DataUnit == TrafficDataUnit.Binary ? 1 : 0;
         StartWithWindowsCheckBox.IsChecked = settings.StartWithWindows;
         MinimizeToTrayCheckBox.IsChecked = settings.MinimizeToTrayOnClose;
+        AutomaticUpdatesCheckBox.IsChecked = settings.AutomaticUpdatesEnabled;
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e) => DialogResult = false;
@@ -36,6 +37,7 @@ public partial class SettingsWindow : Window
                 : TrafficDataUnit.Decimal;
             _settings.StartWithWindows = startWithWindows;
             _settings.MinimizeToTrayOnClose = MinimizeToTrayCheckBox.IsChecked == true;
+            _settings.AutomaticUpdatesEnabled = AutomaticUpdatesCheckBox.IsChecked == true;
             _store.Save(_settings);
             DialogResult = true;
         }

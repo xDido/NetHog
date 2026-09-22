@@ -10,6 +10,7 @@ public sealed class WifiBoxSettings
     public bool MinimizeToTrayOnClose { get; set; } = true;
     public TrafficRateUnit RateUnit { get; set; } = TrafficRateUnit.BitsPerSecond;
     public TrafficDataUnit DataUnit { get; set; } = TrafficDataUnit.Decimal;
+    public bool AutomaticUpdatesEnabled { get; set; } = true;
 }
 
 public sealed class AppSettingsStore

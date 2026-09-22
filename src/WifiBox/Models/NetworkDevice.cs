@@ -14,6 +14,7 @@ public sealed class NetworkDevice : INotifyPropertyChanged
     private double _downloadRateMbps;
     private double _uploadRateMbps;
     private TrafficRateUnit _rateUnit = TrafficRateUnit.BitsPerSecond;
+    private TrafficDataUnit _dataUnit = TrafficDataUnit.Decimal;
     private string _proximitySummary = "Measuring…";
     private string _proximityDetails = "NetHog is taking a short network proximity sample.";
     private bool _hasControl;
@@ -114,11 +115,22 @@ public sealed class NetworkDevice : INotifyPropertyChanged
         ? "No traffic observed"
         : $"↓ {FormatRate(DownloadRateMbps, _rateUnit)}  ·  ↑ {FormatRate(UploadRateMbps, _rateUnit)}";
 
+    public string SessionTrafficSummary => DownloadBytes == 0 && UploadBytes == 0
+        ? "No traffic yet"
+        : $"↓ {FormatBytes(DownloadBytes, _dataUnit)}  ·  ↑ {FormatBytes(UploadBytes, _dataUnit)}";
+
     public void SetRateUnit(TrafficRateUnit rateUnit)
     {
         if (_rateUnit == rateUnit) return;
         _rateUnit = rateUnit;
         OnPropertyChanged(nameof(TrafficSummary));
+    }
+
+    public void SetDataUnit(TrafficDataUnit dataUnit)
+    {
+        if (_dataUnit == dataUnit) return;
+        _dataUnit = dataUnit;
+        OnPropertyChanged(nameof(SessionTrafficSummary));
     }
 
     public void SetTraffic(long downloadBytes, long uploadBytes, double downloadRateMbps = 0, double uploadRateMbps = 0)
@@ -128,6 +140,7 @@ public sealed class NetworkDevice : INotifyPropertyChanged
         DownloadRateMbps = Math.Max(0, downloadRateMbps);
         UploadRateMbps = Math.Max(0, uploadRateMbps);
         OnPropertyChanged(nameof(TrafficSummary));
+        OnPropertyChanged(nameof(SessionTrafficSummary));
     }
 
     public string ControlSummary
@@ -176,6 +189,18 @@ public sealed class NetworkDevice : INotifyPropertyChanged
         if (megabitsPerSecond >= 1) return $"{megabitsPerSecond:0.00} Mbps";
         if (megabitsPerSecond >= 0.001) return $"{megabitsPerSecond * 1_000:0.0} Kbps";
         return $"{megabitsPerSecond * 1_000_000:0} bps";
+    }
+
+    private static string FormatBytes(long bytes, TrafficDataUnit unit)
+    {
+        var divisor = unit == TrafficDataUnit.Binary ? 1_024d : 1_000d;
+        var megabyte = divisor * divisor;
+        var gigabyte = megabyte * divisor;
+        var suffixes = unit == TrafficDataUnit.Binary ? ("MiB", "GiB") : ("MB", "GB");
+        if (bytes >= gigabyte) return $"{bytes / gigabyte:0.0} {suffixes.Item2}";
+        if (bytes >= megabyte) return $"{bytes / megabyte:0.0} {suffixes.Item1}";
+        if (bytes >= divisor) return $"{bytes / divisor:0.0} {(unit == TrafficDataUnit.Binary ? "KiB" : "KB")}";
+        return $"{bytes:N0} B";
     }
 
 }

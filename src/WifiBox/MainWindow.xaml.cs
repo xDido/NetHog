@@ -18,6 +18,9 @@ public partial class MainWindow : Window
     private readonly Dictionary<string, DeviceTraffic> _previousTraffic = new(StringComparer.OrdinalIgnoreCase);
     private readonly DeviceProfileStore _profileStore = new();
     private readonly AppSettingsStore _settingsStore = new();
+    private readonly SessionHistoryStore _sessionHistoryStore = new();
+    private readonly LocalPcControlService _localPcControlService = new();
+    private readonly UpdateService _updateService = new();
     private readonly NetworkProximityService _proximityService = new();
     private readonly DispatcherTimer _trafficTimer;
     private readonly Forms.NotifyIcon _trayIcon;
@@ -33,6 +36,9 @@ public partial class MainWindow : Window
     private CancellationTokenSource? _scanCancellation;
     private Task? _scanTask;
     private bool _devicesWereVisible;
+    private DeviceControlRule? _localRule;
+    private DateTimeOffset _sessionStartedAt;
+    private bool _sessionHistorySaved;
 
     public MainWindow()
     {
@@ -58,6 +64,7 @@ public partial class MainWindow : Window
         if (_startedWithWindows && _settings.MinimizeToTrayOnClose) HideToTray();
         await RefreshEnforcementStatusAsync();
         await RunScanAsync();
+        if (_settings.AutomaticUpdatesEnabled) _ = CheckForUpdatesAsync();
     }
 
     private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -118,6 +125,11 @@ public partial class MainWindow : Window
                 SetSessionStatus("Stopping the session and restoring device ARP entries…");
                 await StopControlSessionAsync();
             }
+
+            // Also remove a policy left by a prior forced termination. These
+            // names are owned by NetHog and are safe to clear on full exit.
+            await _localPcControlService.RemoveRuleAsync();
+            _localRule = null;
         }
         catch (Exception exception)
         {
@@ -153,6 +165,8 @@ public partial class MainWindow : Window
         try
         {
             await _enforcementService.StartSessionAsync(_snapshot);
+            _sessionStartedAt = DateTimeOffset.Now;
+            _sessionHistorySaved = false;
             SetSessionStatus("Session active. Choose Set controls on a device to apply a temporary rule.");
             SetStatus("Control session active. No client is affected until you apply a device rule.");
         }
@@ -174,9 +188,18 @@ public partial class MainWindow : Window
         var dialog = new SettingsWindow(_settingsStore, _settings) { Owner = this };
         if (dialog.ShowDialog() == true)
         {
-            foreach (var device in _devices) device.SetRateUnit(_settings.RateUnit);
+            foreach (var device in _devices)
+            {
+                device.SetRateUnit(_settings.RateUnit);
+                device.SetDataUnit(_settings.DataUnit);
+            }
             SetStatus("Settings saved.");
         }
+    }
+
+    private void HistoryButton_Click(object sender, RoutedEventArgs e)
+    {
+        new HistoryWindow(_sessionHistoryStore, _settings.DataUnit) { Owner = this }.ShowDialog();
     }
 
     private Forms.NotifyIcon CreateTrayIcon()
@@ -238,11 +261,13 @@ public partial class MainWindow : Window
 
     private async void ConfigureDeviceButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!_enforcementService.IsSessionActive
-            || sender is not FrameworkElement { DataContext: NetworkDevice device }
-            || device.IsLocalDevice) return;
+        if (sender is not FrameworkElement { DataContext: NetworkDevice device }) return;
+        if (!device.IsLocalDevice && !_enforcementService.IsSessionActive) return;
+        if (device.IsLocalDevice && _availability?.IsAdministrator != true) return;
 
-        _rules.TryGetValue(device.MacAddress, out var existingRule);
+        var existingRule = device.IsLocalDevice
+            ? _localRule
+            : _rules.GetValueOrDefault(device.MacAddress);
         var dialog = new DeviceControlWindow(device, existingRule) { Owner = this };
         if (dialog.ShowDialog() != true) return;
 
@@ -250,17 +275,35 @@ public partial class MainWindow : Window
         {
             if (dialog.RemoveRequested)
             {
-                await _enforcementService.RemoveRuleAsync(device.MacAddress);
-                _rules.Remove(device.MacAddress);
+                if (device.IsLocalDevice)
+                {
+                    await _localPcControlService.RemoveRuleAsync();
+                    _localRule = null;
+                }
+                else
+                {
+                    await _enforcementService.RemoveRuleAsync(device.MacAddress);
+                    _rules.Remove(device.MacAddress);
+                }
                 SetDeviceRuleState(device, null);
                 SetStatus($"Controls removed for {device.DisplayName}. Its regular routed IPv4 access is restored.");
             }
             else if (dialog.AppliedRule is { } rule)
             {
-                await _enforcementService.ApplyRuleAsync(rule);
-                _rules[device.MacAddress] = rule;
+                if (device.IsLocalDevice)
+                {
+                    await _localPcControlService.ApplyRuleAsync(rule);
+                    _localRule = rule;
+                }
+                else
+                {
+                    await _enforcementService.ApplyRuleAsync(rule);
+                    _rules[device.MacAddress] = rule;
+                }
                 SetDeviceRuleState(device, rule);
-                SetStatus($"Controls applied to {device.DisplayName} for this session.");
+                SetStatus(device.IsLocalDevice
+                    ? "Current PC controls applied through Windows local policy."
+                    : $"Controls applied to {device.DisplayName} for this session.");
             }
         }
         catch (Exception exception)
@@ -310,6 +353,7 @@ public partial class MainWindow : Window
                 uploadRate = Math.Max(0, sample.UploadBytes - previous.UploadBytes) * 8d / 1_000_000d / elapsedSeconds;
             }
             device.SetRateUnit(_settings.RateUnit);
+            device.SetDataUnit(_settings.DataUnit);
             device.SetTraffic(sample.DownloadBytes, sample.UploadBytes, downloadRate, uploadRate);
             _previousTraffic[device.MacAddress] = sample;
             downloadTotalBytes += sample.DownloadBytes;
@@ -363,9 +407,13 @@ public partial class MainWindow : Window
             {
                 if (nicknames.TryGetValue(device.MacAddress, out var nickname)) device.Nickname = nickname;
                 else if (device.HasSuggestedName) device.Nickname = device.SuggestedName;
-                device.CanConfigure = _enforcementService.IsSessionActive
-                                      && device.HasIpv4Address
-                                      && !device.IsLocalDevice;
+                device.SetRateUnit(_settings.RateUnit);
+                device.SetDataUnit(_settings.DataUnit);
+                if (device.IsLocalDevice && _localRule is not null) SetDeviceRuleState(device, _localRule);
+                device.CanConfigure = device.HasIpv4Address
+                                      && (device.IsLocalDevice
+                                          ? _availability?.IsAdministrator == true
+                                          : _enforcementService.IsSessionActive && !device.IsLocalDevice);
                 _devices.Add(device);
             }
 
@@ -499,7 +547,10 @@ public partial class MainWindow : Window
 
         foreach (var device in _devices)
         {
-            device.CanConfigure = isActive && device.HasIpv4Address && !device.IsLocalDevice;
+            device.CanConfigure = device.HasIpv4Address
+                                  && (device.IsLocalDevice
+                                      ? _availability?.IsAdministrator == true
+                                      : isActive && !device.IsLocalDevice);
         }
         ScanButton.IsEnabled = !_scanStarted && !isActive;
         EmptyScanButton.IsEnabled = !_scanStarted && !isActive;
@@ -509,11 +560,20 @@ public partial class MainWindow : Window
     {
         ControlSessionButton.IsEnabled = false;
         SetSessionStatus("Restoring device ARP entries and stopping the capture…");
-        await _enforcementService.StopSessionAsync();
+        var finalTraffic = _enforcementService.GetTrafficSnapshot();
+        var shouldRecordHistory = _sessionStartedAt != default && !_sessionHistorySaved;
+        try
+        {
+            await _enforcementService.StopSessionAsync();
+        }
+        finally
+        {
+            if (shouldRecordHistory) SaveSessionHistory(finalTraffic);
+        }
         _rules.Clear();
         foreach (var device in _devices)
         {
-            SetDeviceRuleState(device, null);
+            if (!device.IsLocalDevice) SetDeviceRuleState(device, null);
             device.SetTraffic(0, 0);
         }
         _previousTraffic.Clear();
@@ -521,8 +581,46 @@ public partial class MainWindow : Window
         TrafficDataText.Text = "Session not active";
         TrafficDataText.ToolTip = "Start a control session to observe the current aggregate rate.";
         OwnershipCheckBox.IsChecked = false;
-        SetStatus("Control session stopped. NetHog attempted ARP restoration; affected devices may take a moment to refresh.");
+        SetStatus("Control session stopped and saved to history. NetHog attempted ARP restoration; affected devices may take a moment to refresh.");
         RefreshSessionUi();
+    }
+
+    private void SaveSessionHistory(IReadOnlyDictionary<string, DeviceTraffic> traffic)
+    {
+        if (_sessionHistorySaved || _sessionStartedAt == default || _snapshot is null) return;
+
+        var devices = _devices.Select(device =>
+        {
+            traffic.TryGetValue(device.MacAddress, out var sample);
+            var controlSummary = device.IsLocalDevice
+                ? (_localRule is null ? "No controls" : device.ControlSummary)
+                : (_rules.TryGetValue(device.MacAddress, out var rule) ? FormatRule(rule) : "No controls");
+            return new SessionDeviceHistory(
+                device.MacAddress,
+                device.DisplayName,
+                device.IpAddress,
+                sample?.DownloadBytes ?? 0,
+                sample?.UploadBytes ?? 0,
+                controlSummary);
+        }).ToArray();
+
+        try
+        {
+            _sessionHistoryStore.Add(new SessionHistoryRecord(
+                Guid.NewGuid(),
+                _sessionStartedAt,
+                DateTimeOffset.Now,
+                _snapshot.InterfaceName,
+                _snapshot.LocalAddress,
+                _snapshot.GatewayAddress,
+                devices));
+            _sessionHistorySaved = true;
+            _sessionStartedAt = default;
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"Session stopped, but history could not be saved: {exception.Message}");
+        }
     }
 
     private static void SetDeviceRuleState(NetworkDevice device, DeviceControlRule? rule)
@@ -534,11 +632,16 @@ public partial class MainWindow : Window
             return;
         }
 
+        device.ControlSummary = FormatRule(rule);
+    }
+
+    private static string FormatRule(DeviceControlRule rule)
+    {
         var parts = new List<string>();
         if (rule.BlockInternet) parts.Add("Blocked");
         if (rule.DownloadLimitMbps is { } download) parts.Add($"↓ {download} Mbps");
         if (rule.UploadLimitMbps is { } upload) parts.Add($"↑ {upload} Mbps");
-        device.ControlSummary = string.Join(" · ", parts);
+        return string.Join(" · ", parts);
     }
 
     private void EnforcementService_SessionEndedUnexpectedly(string message)
@@ -547,12 +650,14 @@ public partial class MainWindow : Window
         {
             SetSessionStatus(message);
             SetStatus(message);
+            var finalTraffic = _enforcementService.GetTrafficSnapshot();
             try { await _enforcementService.StopSessionAsync(); }
             catch { /* best effort; the engine already attempted cleanup */ }
+            SaveSessionHistory(finalTraffic);
             _rules.Clear();
             foreach (var device in _devices)
             {
-                SetDeviceRuleState(device, null);
+                if (!device.IsLocalDevice) SetDeviceRuleState(device, null);
                 device.SetTraffic(0, 0);
             }
             _previousTraffic.Clear();
@@ -576,6 +681,32 @@ public partial class MainWindow : Window
         if (SessionStatusText.Text == message) return;
         SessionStatusText.Text = message;
         UiMotion.Flash(SessionStatusText);
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var update = await _updateService.CheckAsync();
+            if (update is null || !IsVisible) return;
+            var result = MessageBox.Show(
+                this,
+                $"{update.Name} is available. Open the release page to download the portable EXE or MSI installer?",
+                "NetHog update available",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(update.ReleaseUrl)
+                {
+                    UseShellExecute = true
+                });
+            }
+        }
+        catch
+        {
+            // Update checks are optional and must never affect network controls.
+        }
     }
 
     private static string FormatBytes(long bytes, TrafficDataUnit unit)

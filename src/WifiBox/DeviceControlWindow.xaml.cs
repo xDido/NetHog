@@ -13,6 +13,14 @@ public partial class DeviceControlWindow : Window
         _device = device;
         DeviceIdentityText.Text = $"{device.DisplayName}  ·  {device.AddressSummary}";
         MacAddressText.Text = device.MacAddress;
+        if (device.IsLocalDevice)
+        {
+            Title = "Current PC controls";
+            ControlScopeText.Text = "These controls use Windows local traffic policy. Upload can be throttled; Windows cannot shape this PC's incoming traffic here. Leave Download blank.";
+            DownloadLimitTextBox.IsEnabled = false;
+            DownloadHintText.Text = "Unavailable for the current PC";
+            BlockDescriptionText.Text = "Blocks outbound internet traffic from this PC through Windows Firewall.";
+        }
         if (existingRule is not null)
         {
             DownloadLimitTextBox.Text = existingRule.DownloadLimitMbps?.ToString() ?? string.Empty;

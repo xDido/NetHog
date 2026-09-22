@@ -9,6 +9,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>NetHog</AssemblyName>
     <RootNamespace>WifiBox</RootNamespace>
+    <Version>0.1.2</Version>
+    <AssemblyVersion>0.1.2.0</AssemblyVersion>
+    <FileVersion>0.1.2.0</FileVersion>
+    <InformationalVersion>0.1.2</InformationalVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets/NetHog.ico</ApplicationIcon>
   </PropertyGroup>

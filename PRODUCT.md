@@ -29,7 +29,10 @@ The operator runs the app on Windows while connected to the Ethernet or Wi-Fi ne
 ## Capabilities and Constraints
 
 - Discover connected devices and show available IP, MAC, name, and traffic information.
-- Apply session-only upload and download limits in Mbps, or block internet access for a device.
+- Apply session-only upload and download limits in Mbps, or block internet access for a device. The current PC uses Windows local policy for outbound throttling/blocking; inbound shaping is not available through that path.
+- Show cumulative per-device traffic for the active session and preserve completed session history in the app.
+- Ship a portable executable and an MSI installer that removes installed files and app data on uninstall.
+- Do not create cache or temp files; settings, profiles, and history are intentional app data.
 - The first version controls IPv4. Detect IPv6 and warn that IPv4 rules may be bypassed over IPv6.
 - Controls depend on adapter and router behavior; the app must communicate when enforcement is unavailable.
 - Same-subnet local traffic is outside the interception path. Other IPv4 destinations routed by the gateway can also be affected by a block.

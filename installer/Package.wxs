@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package Name="NetHog"
+           Manufacturer="NetHog contributors"
+           Version="0.1.2"
+           UpgradeCode="B4BDB7E4-7059-4566-B0DE-10DB4A35B3C1"
+           Scope="perMachine"
+           InstallerVersion="500"
+           Compressed="yes">
+    <SummaryInformation Description="NetHog Windows network control" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of NetHog is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <util:CloseApplication Id="CloseNetHog"
+                           Target="NetHog.exe"
+                           Condition="REMOVE~=&quot;ALL&quot;"
+                           CloseMessage="yes"
+                           ElevatedCloseMessage="yes"
+                           Timeout="10"
+                           TerminateProcess="1"
+                           RebootPrompt="no" />
+    <Property Id="NET_HOG_DATA_DIR" Value="%LOCALAPPDATA%\NetHog" Secure="yes">
+      <RegistrySearch Id="NetHogDataPathSearch" Root="HKCU"
+                      Key="Software\NetHog" Name="DataPath" Type="raw" />
+    </Property>
+    <Property Id="WIFI_BOX_DATA_DIR" Value="%LOCALAPPDATA%\WifiBox" Secure="yes">
+      <RegistrySearch Id="WifiBoxDataPathSearch" Root="HKCU"
+                      Key="Software\WifiBox" Name="DataPath" Type="raw" />
+    </Property>
+    <SetProperty Id="RemoveNetHogStartup"
+                 Value="powershell.exe -NoProfile -Command &quot;Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name NetHog,WifiBox -EA 0&quot;"
+                 Before="RemoveNetHogStartup" Sequence="execute" />
+    <CustomAction Id="RemoveNetHogStartup"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixQuietExec" Execute="deferred" Impersonate="yes" Return="ignore" />
+    <SetProperty Id="RemoveNetHogPolicies"
+                 Value="powershell.exe -NoProfile -Command &quot;Remove-NetQosPolicy -Name 'NetHog - Current PC upload limit' -Confirm:$false -EA 0; Remove-NetFirewallRule -DisplayName 'NetHog - Current PC internet block' -EA 0&quot;"
+                 Before="RemoveNetHogPolicies" Sequence="execute" />
+    <CustomAction Id="RemoveNetHogPolicies"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="RemoveNetHogStartup" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
+      <Custom Action="RemoveNetHogPolicies" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
+    </InstallExecuteSequence>
+
+    <Feature Id="MainFeature" Title="NetHog" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="NetHog" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="NetHog" />
+    </StandardDirectory>
+
+  </Package>
+
+  <Fragment>
+      <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+        <Component Id="NetHogExecutable" Guid="*">
+          <File Id="NetHogExe" Source="$(var.PublishDir)\NetHog.exe" KeyPath="yes" />
+          <RegistryValue Root="HKLM" Key="Software\NetHog" Name="installed" Type="integer" Value="1" KeyPath="no" />
+        </Component>
+
+        <Component Id="NetHogStartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="*">
+          <Shortcut Id="StartMenuShortcut" Name="NetHog" Target="[INSTALLFOLDER]NetHog.exe" WorkingDirectory="INSTALLFOLDER" />
+          <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\NetHog" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+
+        <Component Id="NetHogUserDataMarkers" Guid="*">
+          <RegistryValue Root="HKCU" Key="Software\NetHog" Name="DataPath" Type="expandable"
+                         Value="%LOCALAPPDATA%\NetHog" KeyPath="yes" />
+          <RegistryValue Root="HKCU" Key="Software\WifiBox" Name="DataPath" Type="expandable"
+                         Value="%LOCALAPPDATA%\WifiBox" KeyPath="no" />
+        </Component>
+
+        <Component Id="RemoveNetHogUserData" Guid="*">
+          <util:RemoveFolderEx On="uninstall" Property="NET_HOG_DATA_DIR" />
+          <util:RemoveFolderEx On="uninstall" Property="WIFI_BOX_DATA_DIR" />
+          <RegistryValue Root="HKLM" Key="Software\NetHog" Name="cleanup" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </ComponentGroup>
+  </Fragment>
+</Wix>
