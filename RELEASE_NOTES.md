@@ -1,4 +1,4 @@
-# NetHog v0.1.0
+# NetHog v0.1.1
 
 NetHog is a portable Windows 10/11 network dashboard for discovering visible devices, naming clients, viewing live traffic rates, applying temporary IPv4 controls, and managing startup/tray behavior.
 

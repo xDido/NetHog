@@ -49,7 +49,7 @@ Launch the rebuilt app from `artifacts\latest\NetHog.exe`. Close any older NetHo
 
 ## Release verification
 
-Release checksums are stored in [`checksums/NetHog-v0.1.0.txt`](checksums/NetHog-v0.1.0.txt). Verify a downloaded executable in PowerShell with:
+Release checksums are stored in [`checksums/NetHog-v0.1.1.txt`](checksums/NetHog-v0.1.1.txt). Verify a downloaded executable in PowerShell with:
 
 ```powershell
 Get-FileHash .\NetHog.exe -Algorithm MD5
