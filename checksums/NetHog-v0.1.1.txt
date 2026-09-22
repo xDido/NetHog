@@ -1,0 +1,7 @@
+NetHog.exe
+MD5: dd440bb2e2fd347bef0cfae897c373c9
+SHA256: 9dc034fdf4dcb98a8a76769c60ddcc5f5cd317174ef816c18794276da5eead7e
+
+NetHog-v0.1.1-win-x64.zip
+MD5: 442f8d235eaada17ebd234a4603bfeae
+SHA256: d7060f204677cd736bfedc8c700603b8f7171308e7fab37e44eca326667a4ea3
