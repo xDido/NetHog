@@ -1,0 +1,175 @@
+<Window x:Class="WifiBox.DeviceControlWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Device controls" Width="520" Height="570" MinWidth="480" MinHeight="530"
+        Icon="pack://application:,,,/Assets/NetHog.ico"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Background="{StaticResource CanvasBrush}" Foreground="{StaticResource InkBrush}"
+        FontFamily="Segoe UI Variable Text, Segoe UI">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Padding" Value="11,8,54,8" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#4A9C88" />
+                    <Setter Property="BorderThickness" Value="2" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="DialogButton" TargetType="Button">
+            <Setter Property="Padding" Value="15,10" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="7"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Grid>
+                                <Border x:Name="HoverOverlay" Background="#126B5A" Opacity="0"
+                                        CornerRadius="7" IsHitTestVisible="False" />
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.55" />
+                                <Setter TargetName="HoverOverlay" Property="Visibility" Value="Collapsed" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.06" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.1" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="2" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#63B9A5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="28,24,28,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Device controls" FontSize="22" FontWeight="SemiBold" />
+            <TextBlock x:Name="DeviceIdentityText" Text="Device · IPv4 address" FontSize="13"
+                       FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" Margin="0,7,0,0" />
+            <TextBlock x:Name="MacAddressText" Text="00:00:00:00:00:00" FontSize="11"
+                       Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{StaticResource AccentSoftBrush}" CornerRadius="8"
+                Padding="12,10" Margin="0,20,0,19">
+            <TextBlock Text="These settings last for this control session. Enter a whole Mbps value, or leave a direction blank for no limit."
+                       FontSize="11" Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap" LineHeight="17" />
+        </Border>
+
+        <Grid Grid.Row="2" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Download" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{StaticResource InkBrush}" Margin="0,0,0,8" />
+                <Grid>
+                    <TextBox x:Name="DownloadLimitTextBox" MaxLength="5"
+                             TextChanged="LimitTextBox_TextChanged"
+                             AutomationProperties.Name="Download limit in Mbps" />
+                    <Border Width="48" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,6,0" Background="#F4F6F8" BorderBrush="#E2E7EC"
+                            BorderThickness="1" CornerRadius="5" IsHitTestVisible="False">
+                        <TextBlock Text="Mbps" FontSize="10" FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                </Grid>
+                <TextBlock Text="Leave blank for no limit" FontSize="10" Foreground="{StaticResource MutedBrush}" Margin="1,7,0,0" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Upload" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{StaticResource InkBrush}" Margin="0,0,0,8" />
+                <Grid>
+                    <TextBox x:Name="UploadLimitTextBox" MaxLength="5"
+                             TextChanged="LimitTextBox_TextChanged"
+                             AutomationProperties.Name="Upload limit in Mbps" />
+                    <Border Width="48" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,6,0" Background="#F4F6F8" BorderBrush="#E2E7EC"
+                            BorderThickness="1" CornerRadius="5" IsHitTestVisible="False">
+                        <TextBlock Text="Mbps" FontSize="10" FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                </Grid>
+                <TextBlock Text="Leave blank for no limit" FontSize="10" Foreground="{StaticResource MutedBrush}" Margin="1,7,0,0" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="3" Background="{StaticResource DangerSoftBrush}" BorderBrush="#F1D8DB"
+                BorderThickness="1" CornerRadius="8" Padding="13,12" Margin="0,0,0,12">
+            <CheckBox x:Name="BlockInternetCheckBox" VerticalAlignment="Center"
+                      Checked="ControlSelection_Changed" Unchecked="ControlSelection_Changed">
+                <StackPanel Margin="6,0,0,0">
+                    <TextBlock Text="Block internet access" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{StaticResource DangerBrush}" />
+                    <TextBlock Text="Blocks IPv4 internet traffic routed through this gateway."
+                               FontSize="10" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                </StackPanel>
+            </CheckBox>
+        </Border>
+
+        <TextBlock x:Name="ValidationText" Grid.Row="4" Text="Limits must be whole numbers from 1 to 10,000 Mbps."
+                   FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="1,1,0,0" />
+
+        <Grid Grid.Row="5" Margin="0,17,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="RemoveControlButton" Content="Remove controls" IsEnabled="False"
+                    Click="RemoveControlButton_Click" HorizontalAlignment="Left"
+                    Foreground="{StaticResource DangerBrush}" Background="White"
+                    BorderBrush="{StaticResource LineBrush}" Style="{StaticResource DialogButton}" />
+            <Button Grid.Column="1" Content="Cancel" IsCancel="True" Margin="0,0,9,0"
+                    Foreground="{StaticResource InkBrush}" Background="White"
+                    BorderBrush="{StaticResource LineBrush}" Style="{StaticResource DialogButton}" />
+            <Button x:Name="ApplyButton" Grid.Column="2" Content="Apply controls" IsDefault="True"
+                    IsEnabled="False" Click="ApplyButton_Click"
+                    Foreground="White" Background="{StaticResource AccentBrush}"
+                    BorderBrush="{StaticResource AccentBrush}" Style="{StaticResource DialogButton}" />
+        </Grid>
+    </Grid>
+</Window>

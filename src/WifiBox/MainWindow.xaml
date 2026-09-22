@@ -1,0 +1,536 @@
+<Window x:Class="WifiBox.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NetHog"
+        Icon="pack://application:,,,/Assets/NetHog.ico"
+        Width="1320"
+        Height="820"
+        MinWidth="640"
+        MinHeight="650"
+        Background="{StaticResource CanvasBrush}"
+        Foreground="{StaticResource InkBrush}"
+        FontFamily="Segoe UI Variable Text, Segoe UI"
+        Loaded="Window_Loaded"
+        SizeChanged="Window_SizeChanged"
+        Closing="Window_Closing">
+    <Window.Resources>
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7" RenderTransformOrigin="0.5,0.5">
+                            <Grid>
+                                <Border x:Name="HoverOverlay" Background="#0A0000" Opacity="0"
+                                        CornerRadius="7" IsHitTestVisible="False" />
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#DCE6E2" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#DCE6E2" />
+                                <Setter TargetName="HoverOverlay" Property="Visibility" Value="Collapsed" />
+                                <Setter Property="Foreground" Value="#52635D" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="2" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#63B9A5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="QuietButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7" RenderTransformOrigin="0.5,0.5">
+                            <Grid>
+                                <Border x:Name="HoverOverlay" Background="#126B5A" Opacity="0"
+                                        CornerRadius="7" IsHitTestVisible="False" />
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F4F6F8" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#E2E7EC" />
+                                <Setter TargetName="HoverOverlay" Property="Visibility" Value="Collapsed" />
+                                <Setter Property="Foreground" Value="#626D7A" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.07" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.11" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="2" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#63B9A5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DeviceTableStyle" TargetType="DataGrid">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserDeleteRows" Value="False" />
+            <Setter Property="CanUserReorderColumns" Value="False" />
+            <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="RowHeight" Value="70" />
+            <Setter Property="ColumnHeaderHeight" Value="44" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="EnableRowVirtualization" Value="True" />
+            <Setter Property="EnableColumnVirtualization" Value="True" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
+            <Setter Property="RowBackground" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="AlternatingRowBackground" Value="#FBFCFC" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style x:Key="TableValueTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="14,0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+        </Style>
+        <Style x:Key="NicknameTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#F7FAF9" />
+            <Setter Property="BorderBrush" Value="#C9DAD5" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding" Value="7,3" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="ToolTip" Value="Name this device. The name is saved for its MAC address." />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#8DBCAF" />
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="Background" Value="White" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="NicknamePlaceholderStyle" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="8,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Nickname}" Value="">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ControlSummaryTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TableValueTextStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasControl}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource GoodBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="DeviceControlButtonStyle" TargetType="Button" BasedOn="{StaticResource QuietButtonStyle}">
+            <Setter Property="Content" Value="Set controls" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasControl}" Value="True">
+                    <Setter Property="Content" Value="Edit controls" />
+                    <Setter Property="Foreground" Value="{StaticResource GoodBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#FAFBFC" />
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style TargetType="DataGridCell">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="DataGridRow">
+            <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="236" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="Sidebar" Grid.Column="0" Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,1,0">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal" Margin="22,22,18,32" VerticalAlignment="Center">
+                        <Border Width="36" Height="36" CornerRadius="10" Background="{StaticResource AccentBrush}">
+                            <Grid>
+                                <Path Data="M7,8 H18 V16 H7 Z M18,12 H23 V20 H18 Z M12.5,16 V21 M10,21 H15"
+                                      Stroke="White" StrokeThickness="1.7" StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Ellipse Width="2.8" Height="2.8" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,6" />
+                            </Grid>
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="NetHog" FontSize="15" FontWeight="Bold" />
+                            <TextBlock Text="NETWORK CONTROL" FontSize="9" FontWeight="SemiBold"
+                                       Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="MANAGE" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}" Margin="23,0,0,10" />
+                    <Border Margin="12,0,12,4" Background="{StaticResource AccentSoftBrush}" CornerRadius="7">
+                        <Grid Height="40">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Background="{StaticResource AccentBrush}" CornerRadius="0,2,2,0" />
+                            <Path Grid.Column="1" Data="M4,5 H20 V18 H4 Z M8,22 H16 M12,18 V22"
+                                  Stroke="{StaticResource AccentBrush}" StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="Devices" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <Button x:Name="SettingsButton" Content="Settings" Style="{StaticResource QuietButtonStyle}"
+                            Click="SettingsButton_Click" HorizontalContentAlignment="Left"
+                            Padding="14,9" Margin="12,4,12,0" AutomationProperties.Name="Open settings" />
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Margin="18,0,18,20">
+                    <Border Height="1" Background="{StaticResource LineBrush}" Margin="2,0,2,15" />
+                    <TextBlock Text="CURRENT NETWORK" FontSize="9" FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}" />
+                    <TextBlock x:Name="SidebarNetworkName" Text="Waiting for scan" FontSize="12"
+                               FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,8,0,4" />
+                    <TextBlock x:Name="SidebarNetworkAddress" Text="Connect to Ethernet or Wi-Fi to begin"
+                               FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                    <Border Background="{StaticResource WarningSoftBrush}" CornerRadius="6" Padding="9,8" Margin="0,16,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="7" Height="7" Fill="{StaticResource WarningBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Session based" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{StaticResource WarningBrush}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid x:Name="MainContentGrid" Grid.Column="1" Margin="32,28,32,22">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,22">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Network devices" FontSize="26" FontWeight="SemiBold" />
+                    <TextBlock Text="See devices on the Ethernet or Wi-Fi network used by this PC."
+                               FontSize="13" Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="HeaderSettingsButton" Content="Settings"
+                            Style="{StaticResource QuietButtonStyle}" Click="SettingsButton_Click"
+                            Margin="0,0,8,0" AutomationProperties.Name="Open settings" />
+                    <Button x:Name="ScanButton"
+                            Style="{StaticResource PrimaryButtonStyle}" Click="ScanButton_Click"
+                            AutomationProperties.Name="Scan the current network">
+                        <TextBlock x:Name="ScanButtonText" Text="Scan network" Foreground="White" FontWeight="SemiBold" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <Border x:Name="SessionCard" Grid.Row="1" Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="9"
+                    Padding="14,11" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <CheckBox x:Name="OwnershipCheckBox" IsEnabled="False" VerticalAlignment="Center"
+                                  Checked="OwnershipCheckBox_Changed" Unchecked="OwnershipCheckBox_Changed">
+                            <TextBlock Text="I administer this network and authorize temporary IPv4 controls for selected devices."
+                                       FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <StackPanel Orientation="Horizontal" Margin="22,5,8,0">
+                            <Ellipse x:Name="SessionStatusDot" Width="7" Height="7" Fill="#8B969F"
+                                     Margin="0,0,7,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="SessionStatusText" Text="Scan the network and confirm ownership to enable controls."
+                                       FontSize="11" Foreground="{StaticResource MutedBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Button x:Name="ControlSessionButton" Grid.Column="1" Content="Start control session"
+                            Style="{StaticResource PrimaryButtonStyle}" Click="ControlSessionButton_Click"
+                            IsEnabled="False" VerticalAlignment="Center" Margin="12,0,0,0" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Background="{StaticResource WarningSoftBrush}" CornerRadius="8"
+                    Padding="13,9" Margin="0,0,0,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="!" FontWeight="Bold" FontSize="15" Foreground="{StaticResource WarningBrush}"
+                               VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Margin="8,0,15,0">
+                    <TextBlock Text="IPv4 controls · dual-stack traffic"
+                                   FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" />
+                        <TextBlock x:Name="EnforcementDetails"
+                                   Text="Live rates include observed IPv4 and IPv6 traffic. Device controls remain temporary and IPv4-only; IPv6 traffic cannot be blocked by the current engine."
+                                   FontSize="12" Foreground="#6C5317" TextWrapping="Wrap" Margin="0,3,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="3" Margin="1,0,1,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition x:Name="TrafficSummaryColumn" Width="260" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="NetworkContextColumn" Width="220" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="DEVICES VISIBLE" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}" />
+                    <TextBlock x:Name="DeviceCountText" Text="—" FontSize="13" FontWeight="SemiBold" Margin="0,3,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="LIVE TRAFFIC RATE" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource MutedBrush}"
+                               ToolTip="Current aggregate download and upload rate across visible devices. Hover the value for session totals." />
+                    <TextBlock x:Name="TrafficDataText" Text="Session not active" FontSize="13" FontWeight="SemiBold"
+                               Margin="0,3,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                               ToolTip="Current aggregate download and upload rate across visible devices." />
+                </StackPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="CONTROL ENGINE" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}" />
+                    <TextBlock x:Name="ControlEngineText" Text="Unavailable" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource WarningBrush}" Margin="0,3,0,0" />
+                </StackPanel>
+                <StackPanel x:Name="NetworkContextPanel" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="CURRENT NETWORK" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Right" />
+                    <TextBlock x:Name="NetworkAddressText" Text="No active network interface"
+                               FontSize="12" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis"
+                               HorizontalAlignment="Right" Margin="0,3,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="4" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" />
+
+            <Grid Grid.Row="5" Margin="0,17,0,0">
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}"
+                        BorderThickness="1" CornerRadius="9">
+                    <Grid>
+                        <DataGrid x:Name="DevicesGrid" Style="{StaticResource DeviceTableStyle}"
+                                  Visibility="Collapsed" AutoGenerateColumns="False"
+                                  AutomationProperties.Name="Visible network devices">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="IP ADDRESSES" Width="1.65*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center" Margin="14,0">
+                                                <TextBlock Text="{Binding AddressSummary}" FontSize="12"
+                                                           Foreground="{StaticResource InkBrush}"
+                                                           TextWrapping="Wrap" ToolTip="IPv4 and IPv6 addresses discovered for this device" />
+                                                <TextBlock Text="{Binding ProximitySummary}" FontSize="10"
+                                                           Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0"
+                                                           ToolTip="{Binding ProximityDetails}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="MAC ADDRESS" Width="2.25*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0">
+                                                <TextBlock Text="{Binding MacAddress}" FontSize="12"
+                                                           Foreground="{StaticResource InkBrush}" />
+                                                <Grid Width="124" Height="27" Margin="10,0,0,0">
+                                                    <TextBox Text="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}"
+                                                             LostFocus="NicknameTextBox_LostFocus"
+                                                             Style="{StaticResource NicknameTextBoxStyle}"
+                                                             AutomationProperties.Name="Nickname for this device">
+                                                        <ToolTipService.ToolTip>
+                                                            <TextBlock FontSize="11">
+                                                                <Run Text="Suggested name: " />
+                                                                <Run Text="{Binding SuggestedName}" />
+                                                                <Run Text=". Edit to set your own nickname." />
+                                                            </TextBlock>
+                                                        </ToolTipService.ToolTip>
+                                                    </TextBox>
+                                                    <TextBlock Text="Name this device"
+                                                               Style="{StaticResource NicknamePlaceholderStyle}" />
+                                                </Grid>
+                                            </WrapPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="CURRENT RATE" Width="1.7*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                            <TextBlock Text="{Binding TrafficSummary}" FontSize="11"
+                                                       Foreground="{StaticResource InkBrush}"
+                                                       VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0"
+                                                       ToolTip="Current observed download and upload rate for this client" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="CONTROL" Width="1.55*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="8,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding ControlSummary}" FontSize="11"
+                                                           Style="{StaticResource ControlSummaryTextStyle}"
+                                                           VerticalAlignment="Center" TextWrapping="Wrap" Margin="5,0" />
+                                                <Button Grid.Column="1" IsEnabled="{Binding CanConfigure}"
+                                                        Click="ConfigureDeviceButton_Click"
+                                                        ToolTip="Set temporary upload and download limits or block routed IPv4 traffic."
+                                                        Style="{StaticResource DeviceControlButtonStyle}" FontSize="11"
+                                                        Padding="9,6" Margin="5,0" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    MaxWidth="420" Margin="30,22">
+                            <Border Width="54" Height="54" CornerRadius="27" Background="{StaticResource AccentSoftBrush}"
+                                    HorizontalAlignment="Center" Margin="0,0,0,18">
+                                <Path Data="M5,8 H15 V16 H5 Z M15,12 H21 V20 H15 Z M10,16 V21 M8,21 H12"
+                                      Stroke="{StaticResource AccentBrush}" StrokeThickness="1.7"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="26" Height="26" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock x:Name="EmptyTitle" Text="Scan your network" FontSize="17"
+                                       FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="EmptyDescription"
+                                       Text="NetHog probes the local IPv4 subnet. Quiet, sleeping, or isolated devices may not appear."
+                                       FontSize="12" Foreground="{StaticResource MutedBrush}" TextAlignment="Center"
+                                       TextWrapping="Wrap" LineHeight="19" Margin="8,8,8,17" />
+                            <Button x:Name="EmptyScanButton" Content="Scan network"
+                                    Style="{StaticResource QuietButtonStyle}" Click="ScanButton_Click"
+                                    HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="6" Margin="1,13,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="StatusText" Text="Connect to Ethernet or Wi-Fi, then scan for visible devices."
+                           FontSize="11" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="NetHog · Windows 10 and 11" FontSize="10"
+                           Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
