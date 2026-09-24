@@ -92,17 +92,6 @@ If `signtool.exe` is not already available from the Windows SDK, the optional he
 
 The local build creates `artifacts\release-v<version>.zip` containing the MSI and portable executable.
 
-## Release signing
-
-GitHub Actions builds the MSI and portable executable when a `v*` tag is pushed. Public release signing can be configured with these repository secrets:
-
-- `NETHOG_CODESIGN_PFX_BASE64`
-- `NETHOG_CODESIGN_PFX_PASSWORD`
-- `NETHOG_CODESIGN_TIMESTAMP_URL` (optional)
-- `NETHOG_UPDATE_SIGNING_KEY` for signing the release archive used by the in-app updater
-
-The project currently releases the MSI and portable ZIP through GitHub Releases. Microsoft Store/MSIX packaging is not part of the current release path.
-
 ## Privacy and local data
 
 NetHog's settings, device profiles, presets, and session history are stored locally on the computer. Network observations and traffic history are used by the local application; NetHog does not require a cloud account for its core monitoring and control features.
