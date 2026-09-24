@@ -16,15 +16,13 @@ public sealed class UpdateService
     private const string LatestReleaseUrl = "https://api.github.com/repos/xDido/NetHog/releases/latest";
     private const string UpdatePublicKeyPem = """
         -----BEGIN PUBLIC KEY-----
-        MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAr6lm5BsU7QF0AVrLEtVA
-        zzh8vnif1XlcyqWDQA5UfTD0brfm10JJMwqnhFn5Q4V4gniCe6OxK5B9ASSUGZrT
-        dPy8lnC59SFi6mHZ+PT7CZjmtq7rdcS6/lEhOZf0VS61OIOsLRo8UBIkv7FoDdM4
-        J7aCBCb0R9haE/fZ8LyjUKylsSyLOlRlf5PQFrftvX//D/c7/IONgRRq6/pdGKp2
-        jIudm5MKfnoPW1SRCN7N6dpmUHV/tJhhRLfHEjhplnTDM6da2M9vO1/co01YB75w
-        c3v7Zm5wRhADhS/SkzOmhN1RwxSDVqPtNj0jpldX5FfsYheYcPVhe4/7rNbRwQOM
-        85pJ5dKW7xG/sqZZolCp063HLA8ltkLKOmpqG/4uGVY/iGl1Jdull27uKuc/jHLs
-        dsW5KbbdzbQbL/7EM55xQcCukxBMoR76qfCfr4X3MjyavXy4REDAYo/qRllrqamL
-        oXGoe5EH9o9RLkbn0NjwvHqxDJY8vcav4GXVP3DZG8f5AgMBAAE=
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0jawrPJzwHxtIjBy1H2H
+        yL6YTkUZ23g4trRDjaCrGiuepSUgLMJL95GDZ45wGE/8skF7Qh/ndjGfUN/kRAmC
+        7bK0P0dIqqeOyoA+aIiILbxtTfAr071HHAX97guAMfGJFT1JIguqAXyq9lA3gEBe
+        F7fGXeuI8VQ4k5GKFs2II3wtojPqEGz3RL9WYz9k25tRhLLDaBZ+mDK2FfwXKBl/
+        ALRAg8LTReqxGkRiSHp6138namjO/3fjF2t9KAmwmLQBE+S89BuM9QAHDCf6ff1o
+        nloAFt7lTXvI6av89SCDy7uCJIKkkKdF8NlpWkgXXzfHKwyZTgy0Mw6AyPckYkqZ
+        UQIDAQAB
         -----END PUBLIC KEY-----
         """;
     private static readonly HttpClient Client = CreateClient(TimeSpan.FromSeconds(8));
