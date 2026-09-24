@@ -36,7 +36,7 @@ jobs:
 
       - name: Build both solution projects on Windows
         if: matrix.os == 'windows-latest'
-        run: dotnet build NetHog.sln -c Release --no-restore
+        run: dotnet build NetHog.sln -c Release
 
       - name: Upload beta package
         uses: actions/upload-artifact@v4
