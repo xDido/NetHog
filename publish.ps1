@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$projectPath = Join-Path $PSScriptRoot "src\WifiBox\NetHog.csproj"
+$projectPath = Join-Path $PSScriptRoot "src\NetHog\NetHog.csproj"
 $outputPath = Join-Path $PSScriptRoot "artifacts\latest"
 
 foreach ($processName in @("NetHog", "WifiBox")) {

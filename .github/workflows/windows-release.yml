@@ -23,13 +23,25 @@ jobs:
 
       - name: Build the portable EXE and MSI
         shell: pwsh
+        env:
+          NETHOG_CODESIGN_PFX_BASE64: ${{ secrets.NETHOG_CODESIGN_PFX_BASE64 }}
+          NETHOG_CODESIGN_PFX_PASSWORD: ${{ secrets.NETHOG_CODESIGN_PFX_PASSWORD }}
+          NETHOG_CODESIGN_TIMESTAMP_URL: ${{ secrets.NETHOG_CODESIGN_TIMESTAMP_URL }}
         run: .\installer\build-msi.ps1
+
+      - name: Sign release archive
+        shell: pwsh
+        env:
+          NETHOG_UPDATE_SIGNING_KEY: ${{ secrets.NETHOG_UPDATE_SIGNING_KEY }}
+        run: .\installer\sign-release.ps1
 
       - name: Upload single Windows release archive
         uses: actions/upload-artifact@v4
         with:
           name: NetHog-win-x64
-          path: artifacts/release-v*.zip
+          path: |
+            artifacts/release-v*.zip
+            artifacts/release-v*.zip.sig
           if-no-files-found: error
 
       - name: Publish tagged release assets
@@ -37,4 +49,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: artifacts/release-v*.zip
+          files: |
+            artifacts/release-v*.zip
+            artifacts/release-v*.zip.sig

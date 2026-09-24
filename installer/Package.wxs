@@ -4,15 +4,19 @@
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Name="NetHog"
            Manufacturer="NetHog contributors"
-           Version="0.1.2"
+           Version="$(var.ProductVersion)"
            UpgradeCode="B4BDB7E4-7059-4566-B0DE-10DB4A35B3C1"
            Scope="perMachine"
            InstallerVersion="500"
            Compressed="yes">
     <SummaryInformation Description="NetHog Windows network control" />
-    <MajorUpgrade DowngradeErrorMessage="A newer version of NetHog is already installed." />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of NetHog is already installed." />
     <MediaTemplate EmbedCab="yes" />
+    <Icon Id="NetHogIcon.ico" SourceFile="..\src\NetHog\Assets\NetHog.ico" />
+    <Property Id="ARPPRODUCTICON" Value="NetHogIcon.ico" />
 
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
     <util:CloseApplication Id="CloseNetHog"
                            Target="NetHog.exe"
@@ -42,9 +46,16 @@
     <CustomAction Id="RemoveNetHogPolicies"
                   BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
                   DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
+    <SetProperty Id="RemoveNetHogCoordinationRule"
+                 Value="powershell.exe -NoProfile -Command &quot;Remove-NetFirewallRule -DisplayName 'NetHog - LAN control coordination' -EA 0&quot;"
+                 Before="RemoveNetHogCoordinationRule" Sequence="execute" />
+    <CustomAction Id="RemoveNetHogCoordinationRule"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
     <InstallExecuteSequence>
       <Custom Action="RemoveNetHogStartup" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
       <Custom Action="RemoveNetHogPolicies" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
+      <Custom Action="RemoveNetHogCoordinationRule" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
     </InstallExecuteSequence>
 
     <Feature Id="MainFeature" Title="NetHog" Level="1">
@@ -68,7 +79,8 @@
         </Component>
 
         <Component Id="NetHogStartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="*">
-          <Shortcut Id="StartMenuShortcut" Name="NetHog" Target="[INSTALLFOLDER]NetHog.exe" WorkingDirectory="INSTALLFOLDER" />
+          <Shortcut Id="StartMenuShortcut" Name="NetHog" Target="[INSTALLFOLDER]NetHog.exe"
+                    WorkingDirectory="INSTALLFOLDER" Icon="NetHogIcon.ico" IconIndex="0" />
           <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall" />
           <RegistryValue Root="HKCU" Key="Software\NetHog" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
         </Component>

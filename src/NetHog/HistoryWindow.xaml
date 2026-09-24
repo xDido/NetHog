@@ -1,0 +1,150 @@
+<Window x:Class="NetHog.HistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Session history" Width="980" Height="650" MinWidth="760" MinHeight="520"
+        Icon="pack://application:,,,/Assets/NetHog.ico"
+        WindowStartupLocation="CenterOwner" Background="{DynamicResource CanvasBrush}"
+        Foreground="{DynamicResource InkBrush}" FontFamily="Segoe UI Variable Text, Segoe UI">
+    <Window.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="RowHeight" Value="42" />
+            <Setter Property="ColumnHeaderHeight" Value="38" />
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource TableAlternateBrush}" />
+        </Style>
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource HeaderSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+    </Window.Resources>
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,18">
+            <TextBlock Text="Session history" FontSize="24" FontWeight="SemiBold" />
+            <TextBlock Text="Review cumulative traffic and controls from completed sessions on this PC."
+                       FontSize="13" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.15*" />
+                <ColumnDefinition Width="1.85*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="9" Margin="0,0,12,0">
+                    <DataGrid x:Name="SessionsGrid" SelectionMode="Extended"
+                              SelectionChanged="SessionsGrid_SelectionChanged"
+                          AutoGenerateColumns="False" CanUserReorderColumns="False"
+                          AutomationProperties.Name="Completed control sessions">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="STARTED" Binding="{Binding StartedAt, StringFormat={}{0:dd MMM yyyy HH:mm}}" Width="1.35*" />
+                        <DataGridTextColumn Header="DEVICES" Binding="{Binding Devices.Count}" Width="0.65*" />
+                        <DataGridTextColumn Header="DURATION" Binding="{Binding Duration, StringFormat={}{0:hh\\:mm\\:ss}}" Width="0.9*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+            <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="9" Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock x:Name="DetailTitleText" Text="Select a session" FontSize="17" FontWeight="SemiBold" />
+                        <TextBlock x:Name="DetailSubtitleText" Text="Completed session details appear here." FontSize="12"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Grid Grid.Row="1" Margin="0,18,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                        <TextBlock Text="TOTAL DOWNLOAD" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource DownloadBrush}" />
+                            <TextBlock x:Name="DownloadTotalText" Text="—" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource DownloadBrush}" Margin="0,3,0,0"
+                                       ToolTip="Download: total traffic received during this session." />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                        <TextBlock Text="TOTAL UPLOAD" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource UploadBrush}" />
+                            <TextBlock x:Name="UploadTotalText" Text="—" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource UploadBrush}" Margin="0,3,0,0"
+                                       ToolTip="Upload: total traffic sent during this session." />
+                        </StackPanel>
+                    </Grid>
+                    <DataGrid Grid.Row="2" x:Name="DevicesGrid" AutoGenerateColumns="False"
+                              CanUserReorderColumns="False" AutomationProperties.Name="Traffic totals by device">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="DEVICE" Binding="{Binding DisplayName}" Width="1.2*" />
+                            <DataGridTextColumn Header="IP ADDRESS" Binding="{Binding IpAddress}" Width="1*" />
+                            <DataGridTemplateColumn Header="DOWNLOAD" Width="1.1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Download}" Foreground="{DynamicResource DownloadBrush}"
+                                                   VerticalAlignment="Center" Margin="12,0"
+                                                   ToolTip="Download: traffic received by this device during the session." />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="UPLOAD" Width="1.1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Upload}" Foreground="{DynamicResource UploadBrush}"
+                                                   VerticalAlignment="Center" Margin="12,0"
+                                                   ToolTip="Upload: traffic sent by this device during the session." />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="CONTROLS" Binding="{Binding ControlSummary}" Width="1.15*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Grid.Row="3" x:Name="DeleteSessionButton" Content="Delete this session"
+                            Click="DeleteSessionButton_Click" IsEnabled="False" HorizontalAlignment="Right"
+                            Margin="0,14,0,0" Padding="12,7" Foreground="{DynamicResource DangerBrush}"
+                            BorderBrush="{DynamicResource DangerBrush}" />
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="2" Margin="1,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="HistoryStatusText" Text="History is stored as app data. Automatic cleanup is available in Settings."
+                   FontSize="12" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                <Button x:Name="CompareSessionsButton" Content="Compare selected"
+                        Click="CompareSessionsButton_Click" IsEnabled="False"
+                        Padding="12,7" Margin="0,0,8,0" />
+                <Button Content="Export CSV" Click="ExportCsvButton_Click"
+                        IsEnabled="{Binding ElementName=SessionsGrid, Path=HasItems}"
+                        Padding="12,7" Margin="0,0,8,0" />
+                <Button Content="Export JSON" Click="ExportJsonButton_Click"
+                        IsEnabled="{Binding ElementName=SessionsGrid, Path=HasItems}"
+                        Padding="12,7" Margin="0,0,8,0" />
+                <Button x:Name="DeleteAllHistoryButton" Content="Delete all history"
+                        Click="DeleteAllHistoryButton_Click" IsEnabled="False"
+                        Padding="12,7" Foreground="{DynamicResource DangerBrush}"
+                        BorderBrush="{DynamicResource DangerBrush}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

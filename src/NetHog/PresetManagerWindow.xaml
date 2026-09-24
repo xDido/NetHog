@@ -1,0 +1,125 @@
+<Window x:Class="NetHog.PresetManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Control presets" Width="760" Height="520" MinWidth="680" MinHeight="460"
+        Icon="pack://application:,,,/Assets/NetHog.ico"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource CanvasBrush}" Foreground="{DynamicResource InkBrush}"
+        FontFamily="Segoe UI Variable Text, Segoe UI">
+    <Grid Margin="26,22,26,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,18">
+            <TextBlock Text="Control presets" FontSize="23" FontWeight="SemiBold" />
+            <TextBlock Text="Save reusable speed limits and blocking rules for your network devices."
+                       FontSize="13" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.05*" />
+                <ColumnDefinition Width="1.55*" />
+            </Grid.ColumnDefinitions>
+            <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="8" Margin="0,0,12,0">
+                <ListBox x:Name="PresetsListBox" BorderThickness="0"
+                         SelectionChanged="PresetsListBox_SelectionChanged"
+                         AutomationProperties.Name="Saved control presets">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="5,6">
+                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Description}" FontSize="12"
+                                           Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="8"
+                    Padding="18,15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Preset details" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="1" Text="Name" FontSize="12" FontWeight="SemiBold"
+                               Margin="0,16,0,6" />
+                    <TextBox x:Name="PresetNameTextBox" Grid.Row="2" Height="34"
+                             Padding="9,6" AutomationProperties.Name="Preset name" />
+                    <TextBlock Grid.Row="3" Text="Description" FontSize="12" FontWeight="SemiBold"
+                               Margin="0,12,0,6" />
+                    <TextBox x:Name="PresetDescriptionTextBox" Grid.Row="4" Height="52"
+                             Padding="9,6" TextWrapping="Wrap" AcceptsReturn="True"
+                             AutomationProperties.Name="Preset description" />
+                    <Grid Grid.Row="5" Margin="0,14,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Download limit" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource DownloadBrush}" />
+                        <TextBlock Grid.Column="2" Text="Upload limit" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource UploadBrush}" />
+                        <TextBox x:Name="PresetDownloadTextBox" Grid.Row="1" Height="34"
+                                 Padding="9,6" MaxLength="5" Margin="0,6,0,0"
+                                 AutomationProperties.Name="Preset download limit in Mbps" />
+                        <TextBox x:Name="PresetUploadTextBox" Grid.Row="1" Grid.Column="2" Height="34"
+                                 Padding="9,6" MaxLength="5" Margin="0,6,0,0"
+                                 AutomationProperties.Name="Preset upload limit in Mbps" />
+                        <TextBlock Grid.Row="2" Text="Mbps or blank" FontSize="11"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="1,5,0,0" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Mbps or blank" FontSize="11"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="1,5,0,0" />
+                        <CheckBox x:Name="PresetBlockCheckBox" Grid.Row="3" Grid.ColumnSpan="3"
+                                  Content="Block routed IPv4 internet access" FontSize="13"
+                                  Margin="0,16,0,0" AutomationProperties.Name="Block internet in preset" />
+                    </Grid>
+                    <TextBlock x:Name="PresetValidationText" Grid.Row="6" Text=""
+                               FontSize="12" Foreground="{DynamicResource DangerBrush}"
+                               TextWrapping="Wrap" Margin="0,12,0,0" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Content="New preset" Click="NewPresetButton_Click"
+                    HorizontalAlignment="Left" Padding="13,8" />
+            <Button Grid.Column="1" Content="Delete" Click="DeletePresetButton_Click"
+                    x:Name="DeletePresetButton" IsEnabled="False"
+                    Foreground="{DynamicResource DangerBrush}" BorderBrush="{DynamicResource DangerBrush}"
+                    Margin="0,0,9,0" Padding="13,8" />
+            <Button Grid.Column="2" Content="Cancel" IsCancel="True"
+                    Margin="0,0,9,0" Padding="13,8" />
+            <Button Grid.Column="3" Content="Save changes" IsDefault="True"
+                    Click="SaveChangesButton_Click" Foreground="{DynamicResource PrimaryButtonTextBrush}"
+                    Background="{DynamicResource AccentBrush}" BorderBrush="{DynamicResource AccentBrush}"
+                    Padding="13,8" />
+        </Grid>
+    </Grid>
+</Window>

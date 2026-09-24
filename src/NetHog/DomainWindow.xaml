@@ -1,0 +1,93 @@
+<Window x:Class="NetHog.DomainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Domain visibility" Width="980" Height="650" MinWidth="760" MinHeight="520"
+        Icon="pack://application:,,,/Assets/NetHog.ico"
+        WindowStartupLocation="CenterOwner" Background="{DynamicResource CanvasBrush}"
+        Foreground="{DynamicResource InkBrush}" FontFamily="Segoe UI Variable Text, Segoe UI"
+        Closing="Window_Closing">
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="Domain visibility" FontSize="24" FontWeight="SemiBold" />
+            <TextBlock Text="See destination names observed for each device and apply scoped block rules."
+                       FontSize="13" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" />
+            <TextBlock Text="Metadata only: NetHog reads DNS questions, TLS SNI, and HTTP Host headers. It does not decrypt HTTPS or capture page content. Rules affect matching routed IPv4 flows; IPv6 is observed but not blocked."
+                       FontSize="12" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,7,0,0" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,18,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="DEVICE" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+            <ComboBox x:Name="DeviceComboBox" Grid.Column="1" Margin="10,0,18,0"
+                      AutomationProperties.Name="Domain rule device">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding AddressSummary}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="DOMAIN" Grid.Column="2" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+            <TextBox x:Name="DomainTextBox" Grid.Column="3" Margin="10,0,18,0"
+                     VerticalContentAlignment="Center" Padding="8,5"
+                     ToolTip="For example: example.com" />
+            <TextBlock Grid.Column="4" Text="Rules apply to this device and its subdomains."
+                       FontSize="12" Foreground="{DynamicResource MutedBrush}"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="5" Content="Block domain" Click="BlockDomainButton_Click"
+                    Padding="12,7" Margin="12,0,0,0" />
+        </Grid>
+
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="9">
+            <DataGrid x:Name="DomainsGrid" AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False" CanUserReorderColumns="False"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      RowHeight="44" ColumnHeaderHeight="38"
+                      SelectionChanged="DomainsGrid_SelectionChanged"
+                      AutomationProperties.Name="Observed domains">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="DEVICE" Binding="{Binding DeviceDisplayName}" Width="1.15*" />
+                    <DataGridTextColumn Header="DOMAIN" Binding="{Binding Domain}" Width="1.45*" />
+                    <DataGridTextColumn Header="SEEN" Binding="{Binding SeenCount}" Width="0.55*" />
+                    <DataGridTextColumn Header="LAST SEEN" Binding="{Binding LastSeen, StringFormat={}{0:HH:mm:ss}}" Width="0.8*" />
+                    <DataGridCheckBoxColumn Header="BLOCKED" Binding="{Binding IsBlocked}" Width="0.7*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Grid Grid.Row="3" Margin="1,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="DomainStatusText"
+                       Text="Start a control session to observe live destination metadata."
+                       FontSize="12" Foreground="{DynamicResource MutedBrush}"
+                       TextWrapping="Wrap" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                <Button x:Name="BlockSelectedButton" Content="Block selected" Click="BlockSelectedButton_Click"
+                        IsEnabled="False" Padding="12,7" Margin="0,0,8,0" />
+                <Button x:Name="UnblockSelectedButton" Content="Unblock selected" Click="UnblockSelectedButton_Click"
+                        IsEnabled="False" Padding="12,7" Foreground="{DynamicResource DangerBrush}"
+                        BorderBrush="{DynamicResource DangerBrush}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

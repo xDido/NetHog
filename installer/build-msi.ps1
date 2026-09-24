@@ -1,7 +1,15 @@
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
-$projectPath = Join-Path $root "src\WifiBox\NetHog.csproj"
+$projectPath = Join-Path $root "src\NetHog\NetHog.csproj"
+$dotnet = (Get-Command dotnet -ErrorAction SilentlyContinue).Source
+if ([string]::IsNullOrWhiteSpace($dotnet)) {
+    $dotnetCandidate = Join-Path ${env:ProgramFiles} "dotnet\dotnet.exe"
+    if (Test-Path -LiteralPath $dotnetCandidate) { $dotnet = $dotnetCandidate }
+}
+if ([string]::IsNullOrWhiteSpace($dotnet)) {
+    throw "The .NET SDK was not found on PATH or under Program Files."
+}
 $buildPath = Join-Path $root "artifacts\.build"
 $publishPath = Join-Path $buildPath "publish"
 $outputPath = Join-Path $buildPath "installer"
@@ -16,7 +24,7 @@ if (Test-Path -LiteralPath $buildPath) {
 
 New-Item -ItemType Directory -Path $buildPath -Force | Out-Null
 
-dotnet publish $projectPath `
+& $dotnet publish $projectPath `
     -c Release `
     -r win-x64 `
     --self-contained true `
@@ -27,9 +35,10 @@ dotnet publish $projectPath `
 if ($LASTEXITCODE -ne 0) { throw "NetHog publish failed with exit code $LASTEXITCODE." }
 
 New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
-dotnet build (Join-Path $PSScriptRoot "NetHog.wixproj") `
+& $dotnet build (Join-Path $PSScriptRoot "NetHog.wixproj") `
     -c Release `
     -p:PublishDir=$publishPath `
+    -p:ProductVersion=$version `
     -p:OutputPath=$outputPath
 
 if ($LASTEXITCODE -ne 0) { throw "NetHog MSI build failed with exit code $LASTEXITCODE." }
@@ -48,6 +57,9 @@ $msiFiles = @(Get-ChildItem -LiteralPath $outputPath -Filter "*.msi" -File)
 
 if (-not (Test-Path -LiteralPath $portablePath)) { throw "Portable NetHog.exe was not produced." }
 if ($msiFiles.Count -eq 0) { throw "NetHog MSI was not produced." }
+
+$signingScript = Join-Path $PSScriptRoot "sign-windows.ps1"
+& $signingScript -Paths (@($portablePath) + @($msiFiles | ForEach-Object { $_.FullName }))
 
 Copy-Item -LiteralPath $portablePath -Destination $latestReleasePath -Force
 $msiFiles | Copy-Item -Destination $installerReleasePath -Force
