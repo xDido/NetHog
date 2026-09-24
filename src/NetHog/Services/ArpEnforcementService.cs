@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Channels;
 using SharpPcap;
@@ -11,7 +12,8 @@ namespace NetHog.Services;
 
 /// <summary>
 /// Session-only IPv4 controls implemented by intercepting packets for opted-in
-/// clients on the selected Ethernet or Wi-Fi LAN. Npcap must be installed on Windows.
+/// clients on the selected Ethernet or Wi-Fi LAN. Npcap is required on Windows;
+/// libpcap is required on Linux.
 /// </summary>
 public sealed class ArpEnforcementService : IEnforcementService
 {
@@ -51,19 +53,20 @@ public sealed class ArpEnforcementService : IEnforcementService
     public Task<EnforcementAvailability> GetAvailabilityAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (!OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsLinux())
         {
-            return Task.FromResult(new EnforcementAvailability(false, "Windows required", "NetHog controls are available on Windows 10 and 11."));
+            return Task.FromResult(new EnforcementAvailability(false, "Unsupported platform", "NetHog controls are currently available on Windows and Linux."));
         }
 
         var isAdministrator = IsAdministrator();
         var devices = GetPcapDevices();
         var npcapAvailable = devices.Count > 0;
+        var captureProvider = OperatingSystem.IsWindows() ? "Npcap" : "libpcap";
         var details = !isAdministrator
-            ? "Administrator rights are required. Launch NetHog with the Windows administrator prompt to start a session."
+            ? "Elevated permission is required. Launch NetHog as administrator on Windows or with sudo/root permission on Linux."
             : !npcapAvailable
-                ? "NetHog is portable, but traffic controls need Npcap installed separately on this PC. Install Npcap, then restart NetHog."
-                : "Npcap is ready. Confirm that you administer this network before starting a temporary IPv4 control session.";
+                ? $"NetHog is portable, but traffic controls need {captureProvider} installed separately on this PC. Install it, then restart NetHog."
+                : $"{captureProvider} is ready. Confirm that you administer this network before starting a temporary IPv4 control session.";
 
         return Task.FromResult(new EnforcementAvailability(
             isAdministrator && npcapAvailable,
@@ -86,7 +89,7 @@ public sealed class ArpEnforcementService : IEnforcementService
 
             if (!IsAdministrator())
             {
-                throw new UnauthorizedAccessException("Start NetHog with administrator rights to control network traffic.");
+                throw new UnauthorizedAccessException("Start NetHog with elevated permission to control network traffic.");
             }
 
             if (!TryParseMac(network.LocalMacAddress, out _) || !TryParseMac(network.GatewayMacAddress, out _))
@@ -102,11 +105,13 @@ public sealed class ArpEnforcementService : IEnforcementService
 
             var adapterGuid = ExtractGuid(network.InterfaceId);
             var device = GetPcapDevices().FirstOrDefault(candidate =>
-                adapterGuid is not null && ExtractGuid(candidate.Name) == adapterGuid);
+                (adapterGuid is not null && ExtractGuid(candidate.Name) == adapterGuid) ||
+                string.Equals(candidate.Name, network.InterfaceId, StringComparison.OrdinalIgnoreCase) ||
+                candidate.Name.EndsWith($"\\{network.InterfaceId}", StringComparison.OrdinalIgnoreCase));
             if (device is null)
             {
                 throw new InvalidOperationException(
-                    "Npcap could not match the active network adapter. USB, virtual, bridged, or vendor-specific adapters may not be supported.");
+                    "The packet-capture library could not match the active network adapter. USB, virtual, bridged, or vendor-specific adapters may not be supported.");
             }
 
             var cancellation = new CancellationTokenSource();
@@ -122,7 +127,7 @@ public sealed class ArpEnforcementService : IEnforcementService
                 if (!device.LinkType.ToString().Equals("Ethernet", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new InvalidOperationException(
-                        $"Npcap reported an unsupported link type ({device.LinkType}). NetHog requires Ethernet frames from this adapter.");
+                        $"The packet-capture library reported an unsupported link type ({device.LinkType}). NetHog requires Ethernet frames from this adapter.");
                 }
 
                 _network = network;
@@ -600,6 +605,12 @@ public sealed class ArpEnforcementService : IEnforcementService
 
     private static bool IsAdministrator()
     {
+        if (OperatingSystem.IsLinux())
+        {
+            try { return geteuid() == 0; }
+            catch { return false; }
+        }
+
         if (!OperatingSystem.IsWindows()) return false;
         try
         {
@@ -608,6 +619,9 @@ public sealed class ArpEnforcementService : IEnforcementService
         }
         catch { return false; }
     }
+
+    [DllImport("libc", EntryPoint = "geteuid")]
+    private static extern uint geteuid();
 
     private static Guid? ExtractGuid(string value)
     {
@@ -622,7 +636,9 @@ public sealed class ArpEnforcementService : IEnforcementService
         try
         {
             return NetworkInterface.GetAllNetworkInterfaces()
-                .Where(adapter => adapter.Id.Equals(network.InterfaceId, StringComparison.OrdinalIgnoreCase))
+                .Where(adapter =>
+                    adapter.Id.Equals(network.InterfaceId, StringComparison.OrdinalIgnoreCase) ||
+                    adapter.Name.Equals(network.InterfaceId, StringComparison.OrdinalIgnoreCase))
                 .Where(adapter => adapter.OperationalStatus == OperationalStatus.Up)
                 .Any(adapter => adapter.GetIPProperties().UnicastAddresses.Any(address =>
                     address.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork

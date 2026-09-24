@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.SettingsDialog"
+        Title="Settings"
+        Width="520"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <ScrollViewer>
+    <Border Background="{DynamicResource SurfaceBrush}" Padding="24">
+      <StackPanel Spacing="15">
+        <StackPanel Spacing="3">
+          <TextBlock Text="Settings" FontSize="22" FontWeight="SemiBold" />
+          <TextBlock Text="Shared preferences for the Windows and Linux desktop clients." Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+          <TextBlock Text="Traffic display" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <ComboBox ItemsSource="{Binding RateUnits}" SelectedItem="{Binding SelectedRateUnit}" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding DataUnits}" SelectedItem="{Binding SelectedDataUnit}" />
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+          <TextBlock Text="Application behavior" FontWeight="SemiBold" />
+          <CheckBox Content="Check for updates automatically" IsChecked="{Binding AutomaticUpdatesEnabled, Mode=TwoWay}" />
+          <CheckBox Content="Start with the desktop session" IsChecked="{Binding StartWithDesktop, Mode=TwoWay}" />
+          <CheckBox Content="Use dark mode" IsChecked="{Binding DarkModeEnabled, Mode=TwoWay}" />
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+          <TextBlock Text="Session history" FontWeight="SemiBold" />
+          <CheckBox Content="Automatically remove old sessions" IsChecked="{Binding HistoryRetentionEnabled, Mode=TwoWay}" />
+          <Grid ColumnDefinitions="110,*,*" ColumnSpacing="10">
+            <TextBox Text="{Binding HistoryRetentionValue, Mode=TwoWay}" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding RetentionUnits}" SelectedItem="{Binding SelectedRetentionUnit}" />
+            <TextBlock Grid.Column="2" Text="Keep completed sessions" Classes="muted" VerticalAlignment="Center" />
+          </Grid>
+        </StackPanel>
+
+        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,6,0,0" ColumnSpacing="10">
+          <TextBlock Text="{Binding ValidationText}" Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center" />
+          <Button Grid.Column="1" Classes="quiet" Content="Cancel" Click="Cancel_Click" />
+          <Button Grid.Column="2" Classes="primary" Content="Save settings" Click="Save_Click" />
+        </Grid>
+      </StackPanel>
+    </Border>
+  </ScrollViewer>
+</Window>

@@ -1,6 +1,6 @@
 ---
 name: NetHog
-description: A Windows desktop tool for discovering devices on the active Ethernet or Wi-Fi network.
+description: A cross-platform desktop tool for discovering devices on the active Ethernet or Wi-Fi network.
 colors:
   primary: "#126B5A"
   accent-soft: "#E7F3EF"
@@ -16,15 +16,15 @@ colors:
   danger-soft: "#FBECEE"
 typography:
   body:
-    fontFamily: "Segoe UI Variable Text, Segoe UI"
+    fontFamily: "Inter, Segoe UI Variable Text, Segoe UI"
     fontSize: "13px"
     fontWeight: 400
   title:
-    fontFamily: "Segoe UI Variable Text, Segoe UI"
+    fontFamily: "Inter, Segoe UI Variable Text, Segoe UI"
     fontSize: "25px"
     fontWeight: 600
   label:
-    fontFamily: "Segoe UI Variable Text, Segoe UI"
+    fontFamily: "Inter, Segoe UI Variable Text, Segoe UI"
     fontSize: "10px"
     fontWeight: 600
 rounded:
@@ -89,7 +89,7 @@ The palette is built from cool neutral surfaces, dark ink, teal actions, and amb
 
 ## Typography
 
-**Body Font:** Segoe UI Variable Text, with Segoe UI fallback.
+**Body Font:** Inter where available, with Segoe UI Variable Text and Segoe UI fallback.
 
 **Character:** Compact and familiar, with enough weight contrast to separate headings, labels, and device data.
 

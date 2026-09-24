@@ -4,6 +4,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetHog", "src\NetHog\NetHog.csproj", "{A96CC35B-9F7A-4DB0-8E31-92E76F027412}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetHog.Avalonia", "src\NetHog.Avalonia\NetHog.Avalonia.csproj", "{D7F5A2D9-5A88-4B8F-AB68-2A8C7C8B7D10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,5 +16,9 @@ Global
 		{A96CC35B-9F7A-4DB0-8E31-92E76F027412}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A96CC35B-9F7A-4DB0-8E31-92E76F027412}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A96CC35B-9F7A-4DB0-8E31-92E76F027412}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7F5A2D9-5A88-4B8F-AB68-2A8C7C8B7D10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7F5A2D9-5A88-4B8F-AB68-2A8C7C8B7D10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7F5A2D9-5A88-4B8F-AB68-2A8C7C8B7D10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7F5A2D9-5A88-4B8F-AB68-2A8C7C8B7D10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

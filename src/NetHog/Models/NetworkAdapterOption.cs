@@ -14,5 +14,5 @@ public sealed record NetworkAdapterOption(
 
     public string DiagnosticSummary =>
         $"{Description} · gateway {GatewayAddress}" +
-        (IsDefaultRoute ? " · selected by Windows default route" : string.Empty);
+        (IsDefaultRoute ? " · selected by the host default route" : string.Empty);
 }

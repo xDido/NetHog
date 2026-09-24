@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>NetHog.Avalonia</AssemblyName>
+    <RootNamespace>NetHog.Avalonia</RootNamespace>
+    <Version>0.2.0</Version>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <FileVersion>0.2.0.0</FileVersion>
+    <ApplicationIcon>../NetHog/Assets/NetHog.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.21" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.21" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.21" />
+    <PackageReference Include="SharpPcap" Version="6.3.1" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../NetHog/Models/*.cs" Link="Models/%(Filename)%(Extension)" />
+    <Compile Include="../NetHog/Services/ArpEnforcementService.cs" Link="Services/ArpEnforcementService.cs" />
+    <Compile Include="../NetHog/Services/DomainObservationStore.cs" Link="Services/DomainObservationStore.cs" />
+    <Compile Include="../NetHog/Services/DomainTrafficInspector.cs" Link="Services/DomainTrafficInspector.cs" />
+    <Compile Include="../NetHog/Services/IEnforcementService.cs" Link="Services/IEnforcementService.cs" />
+    <Compile Include="../NetHog/Services/AppSettingsStore.cs" Link="Services/AppSettingsStore.cs" />
+    <Compile Include="../NetHog/Services/ControlPresetStore.cs" Link="Services/ControlPresetStore.cs" />
+    <Compile Include="../NetHog/Services/DeviceProfileStore.cs" Link="Services/DeviceProfileStore.cs" />
+    <Compile Include="../NetHog/Services/SessionHistoryStore.cs" Link="Services/SessionHistoryStore.cs" />
+    <Compile Include="../NetHog/Services/RemoteControlCoordinator.cs" Link="Services/RemoteControlCoordinator.cs" />
+    <Compile Include="../NetHog/Services/RemoteControlFirewallService.cs" Link="Services/RemoteControlFirewallService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/*" />
+  </ItemGroup>
+</Project>

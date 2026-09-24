@@ -92,6 +92,31 @@ If `signtool.exe` is not already available from the Windows SDK, the optional he
 
 The local build creates `artifacts\release-v<version>.zip` containing the MSI and portable executable.
 
+### Avalonia cross-platform beta
+
+The `linux-beta` branch also contains an Avalonia desktop target at `src/NetHog.Avalonia`. It uses the same device models and ARP packet-control engine as the Windows app, with portable adapter discovery for Windows and Linux.
+
+On Linux, install the .NET 8 SDK and libpcap first. Debian/Ubuntu users can run:
+
+```bash
+sudo apt install libicu-dev libpcap0.8 libpcap-dev
+```
+
+Run the beta from the repository with:
+
+```bash
+dotnet run --project src/NetHog.Avalonia/NetHog.Avalonia.csproj
+```
+
+Build a self-contained package for either desktop platform with:
+
+```bash
+dotnet publish src/NetHog.Avalonia/NetHog.Avalonia.csproj -c Release -r linux-x64 --self-contained true
+dotnet publish src/NetHog.Avalonia/NetHog.Avalonia.csproj -c Release -r win-x64 --self-contained true
+```
+
+The Linux beta needs root or the equivalent packet-capture capabilities to start a control session. Its cross-platform shell is being expanded page by page; the existing WPF application remains the production Windows target until the Avalonia surface reaches feature parity.
+
 ## Privacy and local data
 
 NetHog's settings, device profiles, presets, and session history are stored locally on the computer. Network observations and traffic history are used by the local application; NetHog does not require a cloud account for its core monitoring and control features.

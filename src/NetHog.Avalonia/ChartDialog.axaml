@@ -1,0 +1,37 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.ChartDialog"
+        Title="Live chart"
+        Width="760"
+        Height="460"
+        WindowStartupLocation="CenterOwner">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24" RowSpacing="16">
+    <StackPanel Spacing="3">
+      <TextBlock Text="Live chart" FontSize="22" FontWeight="SemiBold" />
+      <TextBlock Text="A rolling view of observed adapter traffic for the current session." Classes="muted" />
+    </StackPanel>
+    <Border Grid.Row="1" Classes="panel" Padding="16">
+      <Grid RowDefinitions="Auto,*" RowSpacing="12">
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+          <TextBlock Text="{Binding LatestDownloadText}" Foreground="{DynamicResource GoodBrush}" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Grid.Column="1" Text="{Binding LatestUploadText}" Foreground="{DynamicResource WarningBrush}" FontSize="16" FontWeight="SemiBold" />
+        </Grid>
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Samples}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="14" Margin="0,3">
+                <TextBlock Text="{Binding TimeText}" Classes="muted" FontSize="11" />
+                <TextBlock Grid.Column="1" Text="{Binding DownloadText}" />
+                <TextBlock Grid.Column="2" Text="{Binding UploadText}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+      <TextBlock Text="{Binding StatusText}" Classes="muted" />
+      <Button Grid.Column="1" Classes="primary" Content="Close" Click="Close_Click" />
+    </Grid>
+  </Grid>
+</Window>
