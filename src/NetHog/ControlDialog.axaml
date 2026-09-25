@@ -1,0 +1,127 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.ControlDialog"
+        Title="{Binding DialogTitle}"
+        Width="520"
+        MinWidth="480"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="28,24,28,22" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+    <StackPanel Spacing="3">
+      <TextBlock Text="Device controls" FontSize="22" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding TargetDescription}" FontWeight="SemiBold" Margin="0,7,0,0"
+                 TextTrimming="CharacterEllipsis" />
+      <TextBlock Text="{Binding MacAddressText}" FontSize="12"
+                 Classes="muted" Margin="0,3,0,0"
+                 IsVisible="{Binding HasMacAddress}" />
+    </StackPanel>
+
+    <Border Grid.Row="1" Background="{DynamicResource AccentSoftBrush}" CornerRadius="8"
+            Padding="12,10" Margin="0,20,0,19">
+      <TextBlock Text="{Binding ScopeNotice}"
+                 FontSize="12" Foreground="{DynamicResource AccentBrush}"
+                 TextWrapping="Wrap" />
+    </Border>
+
+    <Grid Grid.Row="2" ColumnDefinitions="*,16,*" Margin="0,0,0,15">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Preset" FontSize="12" FontWeight="SemiBold" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}"
+                  SelectionChanged="Preset_SelectionChanged">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Spacing="1">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}" Classes="muted" FontSize="11"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+          </ComboBox>
+          <Button Grid.Column="1" Classes="quiet" Content="Edit presets" Click="ManagePresets_Click"
+                  Padding="10,7" />
+        </Grid>
+        <TextBlock Text="{Binding PresetDescription}" Classes="muted" FontSize="11"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Spacing="8">
+        <TextBlock Text="Automatically remove" FontSize="12" FontWeight="SemiBold" />
+        <ComboBox ItemsSource="{Binding Durations}" SelectedItem="{Binding SelectedDuration}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <TextBlock Text="Controls expire automatically after the selected duration."
+                   Classes="muted" FontSize="11" TextWrapping="Wrap" />
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="3" ColumnDefinitions="*,16,*" Margin="0,0,0,15">
+      <StackPanel Spacing="8" IsEnabled="{Binding IsDownloadEnabled}">
+        <TextBlock Text="Download" FontSize="12" FontWeight="SemiBold"
+                   Foreground="{DynamicResource DownloadBrush}" />
+        <Grid>
+          <TextBox Text="{Binding DownloadText, Mode=TwoWay}" PlaceholderText="Unlimited"
+                   TextInput="IntegerTextBox_TextInput" />
+          <Border Width="48" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center"
+                  Margin="0,0,6,0" Background="{DynamicResource CanvasBrush}"
+                  BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                  CornerRadius="5" IsHitTestVisible="False">
+            <TextBlock Text="Mbps" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource MutedBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+        </Grid>
+          <TextBlock Text="{Binding DownloadHint}" FontSize="11" Classes="muted" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Spacing="8">
+        <TextBlock Text="Upload" FontSize="12" FontWeight="SemiBold"
+                   Foreground="{DynamicResource UploadBrush}" />
+        <Grid>
+          <TextBox Text="{Binding UploadText, Mode=TwoWay}" PlaceholderText="Unlimited"
+                   TextInput="IntegerTextBox_TextInput" />
+          <Border Width="48" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center"
+                  Margin="0,0,6,0" Background="{DynamicResource CanvasBrush}"
+                  BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                  CornerRadius="5" IsHitTestVisible="False">
+            <TextBlock Text="Mbps" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource MutedBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+        </Grid>
+        <TextBlock Text="Leave blank for no limit" FontSize="11" Classes="muted" />
+      </StackPanel>
+    </Grid>
+
+    <Border Grid.Row="4" Background="{DynamicResource DangerSoftBrush}"
+            BorderBrush="{DynamicResource DangerLineBrush}" BorderThickness="1"
+            CornerRadius="8" Padding="13,12" Margin="0,0,0,12">
+      <CheckBox IsChecked="{Binding BlockInternet, Mode=TwoWay}">
+        <StackPanel Margin="6,0,0,0" Spacing="3">
+          <TextBlock Text="Block internet access" FontWeight="SemiBold" FontSize="12"
+                     Foreground="{DynamicResource DangerBrush}" />
+          <TextBlock Text="{Binding BlockDescription}"
+                     FontSize="11" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+      </CheckBox>
+    </Border>
+
+    <Grid Grid.Row="5" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9" Margin="0,5,0,0">
+      <Button Classes="quiet" Content="Remove controls" Click="RemoveControl_Click"
+              IsVisible="{Binding HasExistingRule}" Foreground="{DynamicResource DangerBrush}"
+              HorizontalAlignment="Left" />
+      <TextBlock Text="{Binding ValidationText}" FontSize="12"
+                 Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"
+                 Grid.Column="1" VerticalAlignment="Center" />
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="9">
+        <Button Classes="quiet" Content="Cancel" Click="Cancel_Click" />
+        <Button Classes="primary" Content="Apply controls" Click="Save_Click"
+                IsEnabled="{Binding CanSave}" />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</Window>

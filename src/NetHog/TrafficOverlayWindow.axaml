@@ -1,0 +1,37 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.TrafficOverlayWindow"
+        Title="NetHog traffic overlay"
+        Width="190"
+        Height="52"
+        WindowDecorations="None"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True"
+        CanResize="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        WindowStartupLocation="Manual"
+        PointerPressed="Window_PointerPressed">
+  <Border Background="{DynamicResource OverlayGlassBrush}"
+          BorderBrush="Transparent"
+          BorderThickness="0"
+          CornerRadius="12"
+          Padding="8,5"
+          BoxShadow="0 4 18 0 #48000000">
+    <Grid ColumnDefinitions="*,*">
+      <StackPanel ToolTip.Tip="Download: traffic received by this PC from the network.">
+        <TextBlock Text="↓ DOWNLOAD" FontSize="10" FontWeight="SemiBold"
+                   Foreground="{DynamicResource DownloadBrush}" />
+        <TextBlock x:Name="DownloadRateText" Text="—" FontSize="14" FontWeight="SemiBold"
+                   Foreground="{DynamicResource DownloadBrush}" Margin="0,1,0,0" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" ToolTip.Tip="Upload: traffic sent by this PC to the network.">
+        <TextBlock Text="↑ UPLOAD" FontSize="10" FontWeight="SemiBold"
+                   Foreground="{DynamicResource UploadBrush}" />
+        <TextBlock x:Name="UploadRateText" Text="—" FontSize="14" FontWeight="SemiBold"
+                   Foreground="{DynamicResource UploadBrush}" Margin="0,1,0,0" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

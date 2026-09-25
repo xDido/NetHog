@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.PresetManagerDialog"
+        Title="Control presets"
+        Width="760"
+        Height="520"
+        MinWidth="680"
+        MinHeight="460"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="28,24" RowDefinitions="Auto,*,Auto" RowSpacing="18">
+    <StackPanel Spacing="3">
+      <TextBlock Text="Control presets" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="Save reusable speed limits and IPv4 block profiles for device controls."
+                 Classes="muted" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="230,18,*">
+      <Border Classes="panel" Padding="0">
+        <ListBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                 SelectionChanged="Preset_SelectionChanged" BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Spacing="2" Margin="4,3">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}" Classes="muted" FontSize="11"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
+
+      <Border Grid.Column="2" Classes="panel" Padding="18">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+          <TextBlock Text="Preset details" FontSize="16" FontWeight="SemiBold" />
+          <Grid Grid.Row="1" ColumnDefinitions="120,*" ColumnSpacing="10">
+            <TextBlock Text="Name" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Text="{Binding PresetName, Mode=TwoWay}" />
+          </Grid>
+          <Grid Grid.Row="2" ColumnDefinitions="120,*" ColumnSpacing="10">
+            <TextBlock Text="Description" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Text="{Binding PresetDescription, Mode=TwoWay}" />
+          </Grid>
+          <Grid Grid.Row="3" ColumnDefinitions="120,*,*" ColumnSpacing="10">
+            <TextBlock Text="Limits (Mbps)" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Text="{Binding DownloadText, Mode=TwoWay}" PlaceholderText="Download"
+                     TextInput="IntegerTextBox_TextInput" />
+            <TextBox Grid.Column="2" Text="{Binding UploadText, Mode=TwoWay}" PlaceholderText="Upload"
+                     TextInput="IntegerTextBox_TextInput" />
+          </Grid>
+          <CheckBox Grid.Row="4" Content="Block internet access"
+                    IsChecked="{Binding BlockInternet, Mode=TwoWay}" />
+          <TextBlock Grid.Row="5" Text="{Binding ValidationText}" Foreground="{DynamicResource WarningBrush}"
+                     TextWrapping="Wrap" />
+        </Grid>
+      </Border>
+    </Grid>
+
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="9">
+      <TextBlock Text="Built-in presets cannot be deleted." Classes="muted" VerticalAlignment="Center" />
+      <Button Grid.Column="1" Classes="quiet" Content="New preset" Click="NewPreset_Click" />
+      <Button Grid.Column="2" Classes="quiet" Content="Delete" Click="DeletePreset_Click"
+              IsEnabled="{Binding CanDeleteSelected}" Foreground="{DynamicResource DangerBrush}" />
+      <Button Grid.Column="3" Classes="primary" Content="Save changes" Click="Save_Click" />
+    </Grid>
+  </Grid>
+</Window>

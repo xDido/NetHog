@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.ChartDialog"
+        Title="Live traffic chart"
+        Width="900"
+        Height="560"
+        MinWidth="700"
+        MinHeight="440"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="28,24" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
+    <StackPanel Spacing="3">
+      <TextBlock Text="Live traffic" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="A rolling fifteen-minute view of observed traffic. NetHog keeps this timeline in memory only."
+                 Classes="muted" TextWrapping="Wrap" />
+    </StackPanel>
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,280,*,Auto" ColumnSpacing="10">
+      <TextBlock Text="DEVICE" Classes="section-label" VerticalAlignment="Center" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding Devices}"
+                SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
+                SelectionChanged="Device_SelectionChanged">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis"
+                       ToolTip.Tip="{Binding AddressSummary}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal">
+          <Ellipse Width="8" Height="8" Fill="{DynamicResource DownloadBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+          <TextBlock Text="download" FontSize="12" Foreground="{DynamicResource DownloadBrush}" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="14,0,0,0">
+          <Ellipse Width="8" Height="8" Fill="{DynamicResource UploadBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+          <TextBlock Text="upload" FontSize="12" Foreground="{DynamicResource UploadBrush}" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+
+    <Border Grid.Row="2" Classes="panel" Padding="18,18,18,14">
+      <Grid RowDefinitions="*,Auto" ColumnDefinitions="64,*">
+        <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+          <TextBlock x:Name="ChartMaxRateText" Text="—" FontSize="11" Classes="muted" HorizontalAlignment="Right" VerticalAlignment="Top" />
+          <TextBlock x:Name="ChartMidRateText" Text="—" FontSize="11" Classes="muted" HorizontalAlignment="Right" VerticalAlignment="Center" />
+          <TextBlock x:Name="ChartMinRateText" Text="—" FontSize="11" Classes="muted" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+        </Grid>
+        <Grid Grid.Row="0" Grid.Column="1">
+          <Canvas x:Name="ChartCanvas" SizeChanged="ChartCanvas_SizeChanged" />
+          <StackPanel x:Name="EmptyChartState" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
+            <TextBlock Text="No traffic samples yet" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" />
+            <TextBlock Text="Start a control session and choose a device to see the live timeline."
+                       FontSize="13" Classes="muted" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0" />
+          </StackPanel>
+        </Grid>
+        <TextBlock Grid.Row="1" Text="RATE" Classes="section-label" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,8,10,0" />
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0,7,0,0">
+          <TextBlock x:Name="ChartStartTimeText" Text="—" FontSize="11" Classes="muted" HorizontalAlignment="Left" />
+          <TextBlock x:Name="ChartMidTimeText" Text="—" FontSize="11" Classes="muted" HorizontalAlignment="Center" />
+          <TextBlock x:Name="ChartEndTimeText" Text="—" FontSize="11" Classes="muted" HorizontalAlignment="Right" />
+        </Grid>
+      </Grid>
+    </Border>
+    <StackPanel Grid.Row="3" Spacing="5">
+      <TextBlock x:Name="ChartContextText" Text="Session not active" FontSize="12" Classes="muted" />
+      <StackPanel x:Name="ChartMetricPanel" Orientation="Horizontal">
+        <TextBlock x:Name="ChartDownloadSummaryText" Foreground="{DynamicResource DownloadBrush}" FontSize="12" FontWeight="SemiBold" />
+        <TextBlock Text="·" Classes="muted" Margin="8,0" />
+        <TextBlock x:Name="ChartUploadSummaryText" Foreground="{DynamicResource UploadBrush}" FontSize="12" FontWeight="SemiBold" />
+      </StackPanel>
+    </StackPanel>
+  </Grid>
+</Window>

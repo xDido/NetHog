@@ -6,11 +6,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$project = Join-Path $root "src\NetHog.Avalonia\NetHog.Avalonia.csproj"
+$project = Join-Path $root "src\NetHog\NetHog.csproj"
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $OutputPath = Join-Path $root "artifacts\avalonia-$Runtime"
+    $OutputPath = Join-Path $root "artifacts\NetHog-$Runtime"
 }
 
 dotnet publish $project -c Release -r $Runtime --self-contained true -o $OutputPath
-if ($LASTEXITCODE -ne 0) { throw "Avalonia publish failed with exit code $LASTEXITCODE." }
-Write-Host "Avalonia $Runtime build written to $OutputPath" -ForegroundColor Green
+if ($LASTEXITCODE -ne 0) { throw "NetHog publish failed with exit code $LASTEXITCODE." }
+Write-Host "NetHog $Runtime build written to $OutputPath" -ForegroundColor Green

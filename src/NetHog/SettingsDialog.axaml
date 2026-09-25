@@ -1,0 +1,180 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.SettingsDialog"
+        Title="Settings"
+        Width="820"
+        MinWidth="760"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <Border Margin="20" Padding="24" Classes="panel settings-surface">
+    <Grid RowDefinitions="Auto,Auto,Auto">
+      <StackPanel>
+        <TextBlock Text="Settings" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding SettingsSubtitle}"
+                   Classes="muted" TextWrapping="Wrap" Margin="0,6,0,0" />
+      </StackPanel>
+
+      <Grid Grid.Row="1" Margin="0,22,0,0" ColumnDefinitions="*,24,*">
+        <Border Grid.Column="1" Width="1" HorizontalAlignment="Center"
+                Background="{DynamicResource LineBrush}" />
+
+        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+          <TextBlock Text="Traffic display" FontWeight="SemiBold" />
+          <TextBlock Text="Choose the units used for live rates and captured totals."
+                     FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,4,0,10" />
+          <Grid ColumnDefinitions="145,*" ColumnSpacing="10">
+            <TextBlock Text="Live rate units" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" Padding="8,5" SelectedIndex="{Binding SelectedRateUnitIndex, Mode=TwoWay}">
+              <ComboBoxItem Content="Bits per second (Mbps)" />
+              <ComboBoxItem Content="Bytes per second (MB/s)" />
+            </ComboBox>
+          </Grid>
+          <Grid ColumnDefinitions="145,*" ColumnSpacing="10" Margin="0,9,0,0">
+            <TextBlock Text="Total size units" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" Padding="8,5" SelectedIndex="{Binding SelectedDataUnitIndex, Mode=TwoWay}">
+              <ComboBoxItem Content="Decimal (MB, GB)" />
+              <ComboBoxItem Content="Binary (MiB, GiB)" />
+            </ComboBox>
+          </Grid>
+
+          <TextBlock Text="Overlay" FontWeight="SemiBold" Margin="0,22,0,0" />
+          <CheckBox IsChecked="{Binding ShowTrafficOverlay, Mode=TwoWay}" Margin="0,9,0,0">
+            <StackPanel>
+              <TextBlock Text="Show current PC traffic overlay" FontWeight="SemiBold" />
+              <TextBlock Text="Keep a small always-on-top widget visible with this PC's current download and upload rate."
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+          <Grid Margin="24,10,0,0" ColumnDefinitions="120,*" ColumnSpacing="10">
+            <TextBlock Text="Overlay position" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" Padding="8,5" ItemsSource="{Binding OverlayPositions}"
+                      IsEnabled="{Binding ShowTrafficOverlay}"
+                      SelectedIndex="{Binding SelectedOverlayPositionIndex, Mode=TwoWay}" />
+          </Grid>
+          <Grid Margin="24,9,0,0" ColumnDefinitions="120,*,Auto" ColumnSpacing="10">
+            <TextBlock Text="Overlay opacity" VerticalAlignment="Center" />
+            <Slider Grid.Column="1" Minimum="35" Maximum="100" TickFrequency="5"
+                    IsEnabled="{Binding ShowTrafficOverlay}"
+                    IsSnapToTickEnabled="True" Value="{Binding OverlayOpacityPercent, Mode=TwoWay}"
+                    VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{Binding OverlayOpacityPercent, StringFormat={}{0:0}%}"
+                       MinWidth="45" TextAlignment="Right" VerticalAlignment="Center"
+                       Margin="8,0,0,0" Classes="muted" />
+          </Grid>
+          <Grid Margin="24,9,0,0" ColumnDefinitions="120,*" ColumnSpacing="10">
+            <TextBlock Text="Overlay display" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" Padding="8,5" ItemsSource="{Binding OverlayScreens}"
+                      IsEnabled="{Binding ShowTrafficOverlay}"
+                      SelectedItem="{Binding SelectedOverlayScreen, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Name}" ToolTip.Tip="{Binding DeviceName}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </Grid>
+          <CheckBox Margin="24,9,0,0"
+                    IsChecked="{Binding OverlayClickThrough, Mode=TwoWay}"
+                    IsEnabled="{Binding ShowTrafficOverlay}">
+            <StackPanel>
+              <TextBlock Text="Click-through overlay" FontWeight="SemiBold" />
+              <TextBlock Text="The widget will not intercept mouse clicks. Turn this off temporarily if you want to drag it."
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+
+          <TextBlock Text="Traffic alerts" FontWeight="SemiBold" Margin="0,22,0,0" />
+          <CheckBox IsChecked="{Binding TrafficAlertsEnabled, Mode=TwoWay}" Margin="0,9,0,0">
+            <StackPanel>
+              <TextBlock Text="Alert on high device traffic" FontWeight="SemiBold" />
+              <TextBlock Text="Show a notification when one device exceeds the combined download and upload threshold."
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+          <Grid Margin="24,9,0,0" ColumnDefinitions="120,*,48" ColumnSpacing="10">
+            <TextBlock Text="Alert threshold" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Height="34" Padding="8,5" Text="{Binding TrafficAlertThresholdValue, Mode=TwoWay}"
+                     TextInput="IntegerTextBox_TextInput"
+                     HorizontalContentAlignment="Center" TextAlignment="Center"
+                     VerticalContentAlignment="Center" />
+            <Border Grid.Column="2" Background="{DynamicResource CanvasBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                    CornerRadius="5" Height="34">
+              <TextBlock Text="Mbps" FontSize="11" FontWeight="SemiBold"
+                         Foreground="{DynamicResource MutedBrush}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Margin="12,0,0,0">
+          <TextBlock Text="Appearance and behavior" FontWeight="SemiBold" />
+          <CheckBox IsChecked="{Binding DarkModeEnabled, Mode=TwoWay}" Margin="0,9,0,0">
+            <StackPanel>
+              <TextBlock Text="Use dark mode" FontWeight="SemiBold" />
+              <TextBlock Text="Use a darker palette for lower-glare network monitoring, including dialogs and charts."
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+          <CheckBox IsChecked="{Binding StartWithDesktop, Mode=TwoWay}" Margin="0,18,0,0">
+            <StackPanel>
+              <TextBlock Text="{Binding StartupTitle}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding StartupDescription}"
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+          <CheckBox IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" Margin="0,18,0,0">
+            <StackPanel>
+              <TextBlock Text="Minimize to the notification area when closing" FontWeight="SemiBold" />
+              <TextBlock Text="Hide the window instead of exiting when the close button is used."
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+          <CheckBox IsChecked="{Binding AutomaticUpdatesEnabled, Mode=TwoWay}" Margin="0,18,0,0">
+            <StackPanel>
+              <TextBlock Text="Check for updates automatically" FontWeight="SemiBold" />
+              <TextBlock Text="Checks release metadata when NetHog starts; it never downloads files in the background."
+                         FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
+            </StackPanel>
+          </CheckBox>
+
+          <TextBlock Text="Session history" FontWeight="SemiBold" Margin="0,24,0,0" />
+          <TextBlock Text="Choose whether completed sessions are removed automatically as they age."
+                     FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,4,0,10" />
+          <CheckBox Content="Automatically remove old sessions"
+                    IsChecked="{Binding HistoryRetentionEnabled, Mode=TwoWay}" />
+          <Grid Margin="24,9,0,0" ColumnDefinitions="*,56,96" ColumnSpacing="5">
+            <TextBlock Text="Keep completed sessions for" FontSize="12"
+                       VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Height="34" Padding="8,5" Text="{Binding HistoryRetentionValue, Mode=TwoWay}"
+                     IsEnabled="{Binding HistoryRetentionEnabled}"
+                     TextInput="IntegerTextBox_TextInput"
+                     HorizontalContentAlignment="Center" TextAlignment="Center"
+                     VerticalContentAlignment="Center" />
+            <ComboBox Grid.Column="2" Padding="8,5" MinWidth="96"
+                      IsEnabled="{Binding HistoryRetentionEnabled}"
+                      SelectedIndex="{Binding SelectedRetentionUnitIndex, Mode=TwoWay}">
+              <ComboBoxItem Content="hours" />
+              <ComboBoxItem Content="days" />
+            </ComboBox>
+          </Grid>
+          <TextBlock Text="Older sessions are removed when NetHog starts, saves a session, or opens history."
+                     FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="24,6,0,0" />
+        </StackPanel>
+      </Grid>
+
+      <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" Margin="0,24,0,0">
+        <StackPanel VerticalAlignment="Center" Spacing="2">
+          <TextBlock Text="{Binding ValidationText}" Foreground="{DynamicResource WarningBrush}"
+                     TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ApplyFeedbackText}" Foreground="{DynamicResource GoodBrush}"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="quiet" Content="Apply" Click="Apply_Click" />
+        <Button Grid.Column="2" Classes="quiet" Content="Cancel" Click="Cancel_Click" />
+        <Button Grid.Column="3" Classes="primary" Content="Save settings" Click="Save_Click" />
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

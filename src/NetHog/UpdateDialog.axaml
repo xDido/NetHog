@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.UpdateDialog"
+        Title="NetHog update available"
+        Width="470"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <Border Classes="panel" Margin="20" Padding="22">
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14">
+      <StackPanel Spacing="3">
+        <TextBlock Text="Update available" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding UpdateName}" FontWeight="SemiBold" />
+      </StackPanel>
+      <TextBlock Grid.Row="1" Text="A newer NetHog release is available. Open the GitHub release page to download it."
+                 Classes="muted" TextWrapping="Wrap" />
+      <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button Classes="quiet" Content="Later" Click="Later_Click" />
+        <Button Classes="primary" Content="Open release page" Click="Open_Click" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

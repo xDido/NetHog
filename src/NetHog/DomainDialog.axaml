@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.DomainDialog"
+        Title="Domain visibility"
+        Width="980"
+        Height="650"
+        MinWidth="760"
+        MinHeight="520"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="28,24" RowDefinitions="Auto,Auto,*,Auto">
+    <StackPanel>
+      <TextBlock Text="Domain visibility" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="See destination names observed for each device and apply scoped block rules."
+                 Classes="muted" Margin="0,5,0,0" />
+      <TextBlock Text="Metadata only: NetHog reads DNS questions, TLS SNI, and HTTP Host headers. It does not decrypt HTTPS or capture page content. Rules affect matching routed IPv4 flows; IPv6 is observed but not blocked."
+                 FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,7,0,0" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,18,0,14"
+          ColumnDefinitions="Auto,250,Auto,250,*,Auto" ColumnSpacing="10">
+      <TextBlock Text="DEVICE" Classes="section-label" VerticalAlignment="Center" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding Devices}"
+                SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis"
+                       ToolTip.Tip="{Binding AddressSummary}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <TextBlock Grid.Column="2" Text="DOMAIN" Classes="section-label" VerticalAlignment="Center" />
+      <TextBox Grid.Column="3" Text="{Binding DomainText, Mode=TwoWay}" PlaceholderText="For example: example.com" />
+      <TextBlock Grid.Column="4" Text="Rules apply to this device and its subdomains."
+                 Classes="muted" FontSize="12" VerticalAlignment="Center"
+                 TextTrimming="CharacterEllipsis" />
+      <Button Grid.Column="5" Classes="quiet" Content="Block domain" Click="BlockDomain_Click" />
+    </Grid>
+
+    <Border Grid.Row="2" Classes="panel" Padding="0">
+      <Grid RowDefinitions="38,*">
+        <Border Background="{DynamicResource HeaderSurfaceBrush}"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1">
+          <Grid ColumnDefinitions="1.15*,1.45*,0.55*,0.8*,0.7*">
+            <TextBlock Text="DEVICE" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="DOMAIN" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="SEEN" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="3" Text="LAST SEEN" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="4" Text="STATE" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Observations}"
+                 SelectedItem="{Binding SelectedObservation, Mode=TwoWay}"
+                 SelectionChanged="Observation_SelectionChanged" BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1"
+                      Padding="0" MinHeight="44">
+                <Grid ColumnDefinitions="1.15*,1.45*,0.55*,0.8*,0.7*">
+                  <StackPanel Margin="14,7" Spacing="2">
+                    <TextBlock Text="{Binding DeviceText}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding DeviceAddressText}" Classes="muted" FontSize="11" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Text="{Binding Domain}" Margin="14,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2" Text="{Binding SeenText}" Margin="14,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="3" Text="{Binding LastSeenText}" Margin="14,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="4" Text="{Binding StateText}" Margin="14,0" VerticalAlignment="Center"
+                             Foreground="{Binding StateBrush}" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="3" Margin="1,14,0,0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9">
+      <TextBlock Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" />
+      <Button Grid.Column="1" Classes="quiet" Content="Block selected" Click="BlockSelected_Click"
+              IsEnabled="{Binding CanBlockSelected}" />
+      <Button Grid.Column="2" Classes="quiet" Content="Unblock selected" Click="UnblockSelected_Click"
+              IsEnabled="{Binding CanUnblockSelected}" Foreground="{DynamicResource DangerBrush}" />
+    </Grid>
+  </Grid>
+</Window>

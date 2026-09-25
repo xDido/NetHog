@@ -1,0 +1,99 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.HistoryDialog"
+        Title="Session history"
+        Width="980"
+        Height="650"
+        MinWidth="760"
+        MinHeight="520"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="28,24" RowDefinitions="Auto,*,Auto" RowSpacing="18">
+    <StackPanel Spacing="3">
+      <TextBlock Text="Session history" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="Review cumulative traffic and controls from completed sessions on this PC."
+                 Classes="muted" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="1.15*,12,1.85*">
+      <Border Classes="panel" Padding="0">
+        <ListBox x:Name="SessionsList" ItemsSource="{Binding Records}"
+                 SelectionMode="Multiple" SelectionChanged="Sessions_SelectionChanged"
+                 BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" Padding="14,11">
+                <Grid ColumnDefinitions="1.35*,0.7*,0.9*" ColumnSpacing="10">
+                  <StackPanel Spacing="2">
+                    <TextBlock Text="{Binding StartedText}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding InterfaceText}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Text="{Binding DeviceCountText}" />
+                    <TextBlock Text="{Binding DurationText}" Classes="muted" FontSize="11" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="2">
+                    <TextBlock Text="{Binding DownloadText}" Foreground="{DynamicResource DownloadBrush}" />
+                    <TextBlock Text="{Binding UploadText}" Foreground="{DynamicResource UploadBrush}" FontSize="11" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
+
+      <Border Grid.Column="2" Classes="panel" Padding="18">
+        <Grid RowDefinitions="Auto,Auto,*">
+          <StackPanel Spacing="3">
+            <TextBlock Text="{Binding SelectedTitle}" FontSize="17" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding SelectedSubtitle}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+          </StackPanel>
+          <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,18,0,16">
+            <StackPanel Spacing="3">
+              <TextBlock Text="TOTAL DOWNLOAD" Classes="section-label" Foreground="{DynamicResource DownloadBrush}" />
+              <TextBlock Text="{Binding SelectedDownloadText}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource DownloadBrush}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="3">
+              <TextBlock Text="TOTAL UPLOAD" Classes="section-label" Foreground="{DynamicResource UploadBrush}" />
+              <TextBlock Text="{Binding SelectedUploadText}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource UploadBrush}" />
+            </StackPanel>
+          </Grid>
+          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding SelectedDevices}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                    <Grid ColumnDefinitions="1.2*,1*,Auto,Auto" ColumnSpacing="10">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding IpAddress}" Classes="muted" FontSize="11" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="1" Text="{Binding ControlSummary}" Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="2" Text="{Binding DownloadText}" Foreground="{DynamicResource DownloadBrush}" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="3" Text="{Binding UploadText}" Foreground="{DynamicResource UploadBrush}" VerticalAlignment="Center" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+      <TextBlock Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" />
+      <Button Grid.Column="1" Classes="quiet" Content="Compare selected" Click="Compare_Click"
+              IsEnabled="{Binding CanCompare}" />
+      <Button Grid.Column="2" Classes="quiet" Content="Delete selected" Click="DeleteSelected_Click"
+              IsEnabled="{Binding HasSelection}" Foreground="{DynamicResource DangerBrush}" />
+      <Button Grid.Column="3" Classes="quiet" Content="Delete all" Click="DeleteAll_Click"
+              IsEnabled="{Binding HasRecords}" Foreground="{DynamicResource DangerBrush}" />
+      <Button Grid.Column="4" Classes="quiet" Content="Export CSV" Click="ExportCsv_Click"
+              IsEnabled="{Binding HasRecords}" />
+      <Button Grid.Column="5" Classes="quiet" Content="Export JSON" Click="ExportJson_Click"
+              IsEnabled="{Binding HasRecords}" />
+      <Button Grid.Column="6" Classes="primary" Content="Close" Click="Close_Click" />
+    </Grid>
+  </Grid>
+</Window>

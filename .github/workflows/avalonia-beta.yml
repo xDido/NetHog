@@ -1,4 +1,4 @@
-name: Avalonia cross-platform beta
+name: Cross-platform desktop build
 
 on:
   workflow_dispatch:
@@ -31,16 +31,16 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Build the Avalonia target
-        run: dotnet publish src/NetHog.Avalonia/NetHog.Avalonia.csproj -c Release -r ${{ matrix.runtime }} --self-contained true -o artifacts/avalonia-${{ matrix.runtime }}
+      - name: Build NetHog
+        run: dotnet publish src/NetHog/NetHog.csproj -c Release -r ${{ matrix.runtime }} --self-contained true -o artifacts/NetHog-${{ matrix.runtime }}
 
-      - name: Build both solution projects on Windows
+      - name: Build the solution on Windows
         if: matrix.os == 'windows-latest'
         run: dotnet build NetHog.sln -c Release
 
-      - name: Upload beta package
+      - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: NetHog-Avalonia-${{ matrix.runtime }}
-          path: artifacts/avalonia-${{ matrix.runtime }}
+          name: NetHog-${{ matrix.runtime }}
+          path: artifacts/NetHog-${{ matrix.runtime }}
           if-no-files-found: error

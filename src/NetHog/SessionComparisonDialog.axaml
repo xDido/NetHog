@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.SessionComparisonDialog"
+        Title="Compare sessions"
+        Width="760"
+        Height="430"
+        MinWidth="620"
+        MinHeight="360"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="28,24" RowDefinitions="Auto,*,Auto" RowSpacing="18">
+    <StackPanel Spacing="3">
+      <TextBlock Text="Compare sessions" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="A compact comparison of the two selected completed sessions."
+                 Classes="muted" />
+    </StackPanel>
+    <Grid Grid.Row="1" ColumnDefinitions="*,20,*">
+      <Border Classes="panel" Padding="18">
+        <StackPanel Spacing="5">
+          <TextBlock Text="{Binding First.DateText}" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding First.NetworkText}" Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,13" />
+          <TextBlock Text="{Binding First.DurationText}" />
+          <TextBlock Text="{Binding First.DevicesText}" />
+          <TextBlock Text="{Binding First.DownloadText}" Foreground="{DynamicResource DownloadBrush}" />
+          <TextBlock Text="{Binding First.UploadText}" Foreground="{DynamicResource UploadBrush}" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="2" Classes="panel" Padding="18">
+        <StackPanel Spacing="5">
+          <TextBlock Text="{Binding Second.DateText}" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Second.NetworkText}" Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,13" />
+          <TextBlock Text="{Binding Second.DurationText}" />
+          <TextBlock Text="{Binding Second.DevicesText}" />
+          <TextBlock Text="{Binding Second.DownloadText}" Foreground="{DynamicResource DownloadBrush}" />
+          <TextBlock Text="{Binding Second.UploadText}" Foreground="{DynamicResource UploadBrush}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+    <TextBlock Grid.Row="2" Text="Traffic totals are observed IPv4/IPv6 bytes attributed to visible devices during each session."
+               Classes="muted" FontSize="12" />
+  </Grid>
+</Window>

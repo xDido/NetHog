@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Net;
 using System.Runtime.CompilerServices;
 
 namespace NetHog.Models;
@@ -18,6 +19,7 @@ public sealed class NetworkDevice : INotifyPropertyChanged
     private string _proximitySummary = "Measuring…";
     private string _proximityDetails = "NetHog is taking a short network proximity sample.";
     private bool _hasControl;
+    private bool _isRemoteControl;
     private bool _canConfigure;
     private bool _isBulkSelected;
 
@@ -42,6 +44,7 @@ public sealed class NetworkDevice : INotifyPropertyChanged
         : string.IsNullOrWhiteSpace(Ipv6Summary)
             ? IpAddress
             : $"{IpAddress}\n{Ipv6Summary}";
+    public string IpAddressSortKey => BuildIpAddressSortKey(IpAddress);
     public bool IsLocalDevice { get; }
     public string SuggestedName => _discoveredName;
     public bool HasSuggestedName => !_discoveredName.StartsWith("Device ", StringComparison.OrdinalIgnoreCase);
@@ -124,6 +127,8 @@ public sealed class NetworkDevice : INotifyPropertyChanged
     public string UploadRateText => FormatRate(UploadRateMbps, _rateUnit);
     public string DownloadSessionText => FormatBytes(DownloadBytes, _dataUnit);
     public string UploadSessionText => FormatBytes(UploadBytes, _dataUnit);
+    public double CurrentRateSort => DownloadRateMbps + UploadRateMbps;
+    public long SessionTrafficSort => DownloadBytes + UploadBytes;
 
     public void SetRateUnit(TrafficRateUnit rateUnit)
     {
@@ -155,6 +160,8 @@ public sealed class NetworkDevice : INotifyPropertyChanged
         OnPropertyChanged(nameof(UploadRateText));
         OnPropertyChanged(nameof(DownloadSessionText));
         OnPropertyChanged(nameof(UploadSessionText));
+        OnPropertyChanged(nameof(CurrentRateSort));
+        OnPropertyChanged(nameof(SessionTrafficSort));
     }
 
     public string ControlSummary
@@ -180,8 +187,20 @@ public sealed class NetworkDevice : INotifyPropertyChanged
     public bool HasControl
     {
         get => _hasControl;
-        set => SetField(ref _hasControl, value);
+        set
+        {
+            if (!SetField(ref _hasControl, value)) return;
+            OnPropertyChanged(nameof(ControlActionText));
+        }
     }
+
+    public bool IsRemoteControl
+    {
+        get => _isRemoteControl;
+        set => SetField(ref _isRemoteControl, value);
+    }
+
+    public string ControlActionText => HasControl ? "Edit controls" : "Set controls";
 
     public bool CanConfigure
     {
@@ -223,6 +242,12 @@ public sealed class NetworkDevice : INotifyPropertyChanged
         if (megabitsPerSecond >= 1) return $"{megabitsPerSecond:0.00} Mbps";
         if (megabitsPerSecond >= 0.001) return $"{megabitsPerSecond * 1_000:0.0} Kbps";
         return $"{megabitsPerSecond * 1_000_000:0} bps";
+    }
+
+    private static string BuildIpAddressSortKey(string address)
+    {
+        if (!IPAddress.TryParse(address, out var parsed)) return address;
+        return string.Join(".", parsed.GetAddressBytes().Select(part => part.ToString("D3")));
     }
 
     private static string FormatBytes(long bytes, TrafficDataUnit unit)

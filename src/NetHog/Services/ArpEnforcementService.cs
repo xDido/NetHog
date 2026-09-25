@@ -390,8 +390,16 @@ public sealed class ArpEnforcementService : IEnforcementService
                 if (frame.Length < ipOffset + 40 || (frame[ipOffset] >> 4) != 6) return;
                 var sourceIpv6 = new IPAddress(frame.AsSpan(ipOffset + 8, 16));
                 var destinationIpv6 = new IPAddress(frame.AsSpan(ipOffset + 24, 16));
-                ObserveDomain(network, sourceIpv6, frame, ipOffset);
-                RecordObservedTraffic(network, sourceIpv6, destinationIpv6, frame.Length);
+                var ipv6SourceMac = frame.AsSpan(6, 6);
+                var ipv6DestinationMac = frame.AsSpan(0, 6);
+                ObserveDomain(network, sourceIpv6, ipv6SourceMac, frame, ipOffset);
+                RecordObservedTraffic(
+                    network,
+                    sourceIpv6,
+                    destinationIpv6,
+                    ipv6SourceMac,
+                    ipv6DestinationMac,
+                    frame.Length);
                 return;
             }
 
@@ -405,9 +413,15 @@ public sealed class ArpEnforcementService : IEnforcementService
             var sourceMac = frame.AsSpan(6, 6);
             var destinationMac = frame.AsSpan(0, 6);
 
-            RecordObservedTraffic(network, sourceIp, destinationIp, frame.Length);
-            var sourceDevice = network.Devices.FirstOrDefault(candidate =>
-                candidate.IpAddress.Equals(sourceIp.ToString(), StringComparison.Ordinal));
+            RecordObservedTraffic(
+                network,
+                sourceIp,
+                destinationIp,
+                sourceMac,
+                destinationMac,
+                frame.Length);
+            var sourceDevice = FindDeviceForAddress(network, sourceIp)
+                               ?? FindDeviceForMac(network, sourceMac);
             var observedDomain = DomainTrafficInspector.TryReadDomain(frame, ipOffset);
             if (sourceDevice is not null && observedDomain is not null)
             {
@@ -471,13 +485,17 @@ public sealed class ArpEnforcementService : IEnforcementService
         NetworkSnapshot network,
         IPAddress sourceIp,
         IPAddress destinationIp,
+        ReadOnlySpan<byte> sourceMac,
+        ReadOnlySpan<byte> destinationMac,
         int frameLength)
     {
         if (sourceIp.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
         {
-            if (destinationIp.IsIPv6Multicast) return;
-            var sourceDevice = FindDeviceForAddress(network, sourceIp);
-            var destinationDevice = FindDeviceForAddress(network, destinationIp);
+            if (sourceIp.IsIPv6Multicast || destinationIp.IsIPv6Multicast) return;
+            var sourceDevice = FindDeviceForAddress(network, sourceIp)
+                               ?? FindDeviceForMac(network, sourceMac);
+            var destinationDevice = FindDeviceForAddress(network, destinationIp)
+                                    ?? FindDeviceForMac(network, destinationMac);
             if (sourceDevice is not null && destinationDevice is null)
             {
                 AddTraffic(sourceDevice.MacAddress, frameLength, upload: true);
@@ -496,8 +514,8 @@ public sealed class ArpEnforcementService : IEnforcementService
         var destinationIsRouted = !IsInLocalSubnet(destinationIp, network.LocalAddress, network.PrefixLength);
         if (destinationIsRouted)
         {
-            var uploadDevice = network.Devices.FirstOrDefault(candidate =>
-                sourceIp.ToString().Equals(candidate.IpAddress, StringComparison.Ordinal));
+            var uploadDevice = FindDeviceForAddress(network, sourceIp)
+                               ?? FindDeviceForMac(network, sourceMac);
             if (uploadDevice is not null)
             {
                 AddTraffic(uploadDevice.MacAddress, frameLength, upload: true);
@@ -506,8 +524,8 @@ public sealed class ArpEnforcementService : IEnforcementService
         }
 
         if (IsInLocalSubnet(sourceIp, network.LocalAddress, network.PrefixLength)) return;
-        var downloadDevice = network.Devices.FirstOrDefault(candidate =>
-            destinationIp.ToString().Equals(candidate.IpAddress, StringComparison.Ordinal));
+        var downloadDevice = FindDeviceForAddress(network, destinationIp)
+                             ?? FindDeviceForMac(network, destinationMac);
         if (downloadDevice is not null)
         {
             AddTraffic(downloadDevice.MacAddress, frameLength, upload: false);
@@ -520,9 +538,27 @@ public sealed class ArpEnforcementService : IEnforcementService
             || candidate.Ipv6Addresses.Any(candidateAddress =>
                 IPAddress.TryParse(candidateAddress, out var ipv6) && ipv6.Equals(address)));
 
-    private void ObserveDomain(NetworkSnapshot network, IPAddress sourceAddress, byte[] frame, int ipOffset)
+    private static NetworkDevice? FindDeviceForMac(NetworkSnapshot network, ReadOnlySpan<byte> mac)
     {
-        var sourceDevice = FindDeviceForAddress(network, sourceAddress);
+        if (mac.Length != 6) return null;
+        foreach (var device in network.Devices)
+        {
+            if (!TryParseMac(device.MacAddress, out var deviceMac)) continue;
+            if (mac.SequenceEqual(deviceMac)) return device;
+        }
+
+        return null;
+    }
+
+    private void ObserveDomain(
+        NetworkSnapshot network,
+        IPAddress sourceAddress,
+        ReadOnlySpan<byte> sourceMac,
+        byte[] frame,
+        int ipOffset)
+    {
+        var sourceDevice = FindDeviceForAddress(network, sourceAddress)
+                           ?? FindDeviceForMac(network, sourceMac);
         var domain = DomainTrafficInspector.TryReadDomain(frame, ipOffset);
         if (sourceDevice is not null && domain is not null)
         {

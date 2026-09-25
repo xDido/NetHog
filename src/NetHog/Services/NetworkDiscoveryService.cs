@@ -159,7 +159,10 @@ public sealed class NetworkDiscoveryService : INetworkDiscoveryService
             lastHost = Math.Min(lastHost, firstHost + maximumProbeCount - 1);
         }
 
-        using var gate = new SemaphoreSlim(48);
+        // A normal home LAN is usually a /24. Probe more hosts concurrently
+        // and use a shorter timeout for silent addresses so discovery does not
+        // spend most of its time waiting on hosts that do not answer ICMP.
+        using var gate = new SemaphoreSlim(96);
         var probeTasks = new List<Task>();
         for (var candidate = firstHost; candidate <= lastHost; candidate++)
         {
@@ -192,7 +195,7 @@ public sealed class NetworkDiscoveryService : INetworkDiscoveryService
             using var ping = new Ping();
             try
             {
-                await ping.SendPingAsync(address, 350);
+                await ping.SendPingAsync(address, 250);
             }
             catch (PingException)
             {

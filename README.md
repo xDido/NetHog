@@ -1,8 +1,8 @@
 # NetHog
 
-NetHog is a Windows 10/11 network monitor and bandwidth-control dashboard—and a modern **SelfishNet alternative** for home networks and small-network administrators. Discover devices on your LAN, watch live traffic, temporarily limit upload/download speeds, or block routed IPv4 internet access from one Windows PC.
+NetHog is a Windows 10/11 network monitor and bandwidth-control dashboard—and a modern **SelfishNet alternative** for home networks and small-network administrators. Discover devices on your LAN, watch live traffic, temporarily limit upload/download speeds, or block routed IPv4 internet access from one computer.
 
-NetHog is not affiliated with SelfishNet. It uses a modern WPF interface, Npcap, and temporary network controls instead of requiring a compatible router API.
+NetHog is not affiliated with SelfishNet. It uses a modern Avalonia 12 interface, Npcap or libpcap, and temporary network controls instead of requiring a compatible router API.
 
 ## Why use NetHog?
 
@@ -92,9 +92,9 @@ If `signtool.exe` is not already available from the Windows SDK, the optional he
 
 The local build creates `artifacts\release-v<version>.zip` containing the MSI and portable executable.
 
-### Avalonia cross-platform beta
+### Cross-platform desktop build
 
-The `linux-beta` branch also contains an Avalonia desktop target at `src/NetHog.Avalonia`. It uses the same device models and ARP packet-control engine as the Windows app, with portable adapter discovery for Windows and Linux.
+The desktop application is built with Avalonia 12 from the single project at `src/NetHog`. It uses the same device models and ARP packet-control engine on Windows and Linux, with portable adapter discovery.
 
 On Linux, install the .NET 8 SDK and libpcap first. Debian/Ubuntu users can run:
 
@@ -105,17 +105,17 @@ sudo apt install libicu-dev libpcap0.8 libpcap-dev
 Run the beta from the repository with:
 
 ```bash
-dotnet run --project src/NetHog.Avalonia/NetHog.Avalonia.csproj
+dotnet run --project src/NetHog/NetHog.csproj
 ```
 
 Build a self-contained package for either desktop platform with:
 
 ```bash
-dotnet publish src/NetHog.Avalonia/NetHog.Avalonia.csproj -c Release -r linux-x64 --self-contained true
-dotnet publish src/NetHog.Avalonia/NetHog.Avalonia.csproj -c Release -r win-x64 --self-contained true
+dotnet publish src/NetHog/NetHog.csproj -c Release -r linux-x64 --self-contained true
+dotnet publish src/NetHog/NetHog.csproj -c Release -r win-x64 --self-contained true
 ```
 
-The Linux beta needs root or the equivalent packet-capture capabilities to start a control session. Its cross-platform shell is being expanded page by page; the existing WPF application remains the production Windows target until the Avalonia surface reaches feature parity.
+The Linux build needs root or the equivalent packet-capture capabilities to start a control session. On Windows, the MSI and portable release use this same Avalonia desktop application.
 
 ## Privacy and local data
 

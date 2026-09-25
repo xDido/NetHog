@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NetHog.Avalonia.ConfirmationDialog"
+        Title="Confirm action"
+        Width="480"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <Border Margin="20" Padding="24" Classes="panel">
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="18">
+      <TextBlock Text="{Binding DialogTitle}" FontSize="20" FontWeight="SemiBold" />
+      <TextBlock Grid.Row="1" Text="{Binding Message}" Classes="muted"
+                 TextWrapping="Wrap" />
+      <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9">
+        <Button Grid.Column="1" Classes="quiet" Content="Cancel" Click="Cancel_Click" />
+        <Button Grid.Column="2" Classes="primary" Content="{Binding ConfirmText}" Click="Confirm_Click" />
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

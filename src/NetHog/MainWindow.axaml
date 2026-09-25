@@ -1,0 +1,610 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="NetHog.Avalonia.MainWindow"
+        Title="NetHog"
+        Icon="avares://NetHog/Assets/NetHog.ico"
+        Width="1320"
+        Height="820"
+        MinWidth="960"
+        MinHeight="650"
+        SizeChanged="Window_SizeChanged">
+  <Grid x:Name="RootLayout">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="236" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <Border x:Name="Sidebar" Grid.Column="0"
+            Background="{DynamicResource SidebarBrush}"
+            BorderBrush="{DynamicResource LineBrush}"
+            BorderThickness="0,0,1,0">
+      <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Top">
+          <StackPanel Orientation="Horizontal" Margin="18,20,18,18" VerticalAlignment="Center">
+            <Image Width="42" Height="42"
+                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                   Source="avares://NetHog/Assets/NetHog-icon.png" />
+            <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="NetHog" FontSize="18" FontWeight="Bold" />
+              <TextBlock Text="NETWORK CONTROL" FontSize="10" FontWeight="SemiBold"
+                         Foreground="{DynamicResource MutedBrush}" Margin="0,2,0,0" />
+            </StackPanel>
+          </StackPanel>
+
+          <Border x:Name="SidebarAuthorityCard" Margin="12,0,12,14"
+                  Padding="11,10" Background="{DynamicResource AccentSoftBrush}"
+                  BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                  CornerRadius="8">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Width="24" Height="24" CornerRadius="7"
+                        Background="{DynamicResource AccentBrush}">
+                  <materialIcons:MaterialIcon Kind="ShieldCheckOutline"
+                                              Width="16" Height="16"
+                                              Foreground="{DynamicResource PrimaryButtonTextBrush}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="NETWORK AUTHORITY" Classes="section-label"
+                             Foreground="{DynamicResource AccentBrush}" />
+                  <TextBlock Text="Required for controls" FontSize="11"
+                             Foreground="{DynamicResource MutedBrush}" Margin="0,2,0,0" />
+                </StackPanel>
+              </StackPanel>
+              <CheckBox Margin="0,10,0,0"
+                        Foreground="{DynamicResource InkBrush}"
+                        IsChecked="{Binding IsNetworkAdminConfirmed, Mode=TwoWay}"
+                        IsEnabled="{Binding CanConfirmNetwork}">
+                <TextBlock Text="I administer this network" FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource InkBrush}"
+                           Opacity="1" />
+              </CheckBox>
+              <TextBlock Text="{Binding SessionStatusText}" FontSize="11"
+                         Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"
+                         Margin="22,5,0,0" />
+            </StackPanel>
+          </Border>
+
+          <StackPanel Margin="18,0,18,14" Spacing="0">
+            <Border Height="1" Background="{DynamicResource LineBrush}" Margin="2,0,2,10" />
+            <TextBlock Text="CURRENT NETWORK" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource MutedBrush}" />
+            <TextBlock Text="{Binding SidebarNetworkName}" FontSize="12" FontWeight="SemiBold"
+                       TextWrapping="Wrap" Margin="0,6,0,3" />
+            <TextBlock Text="{Binding SidebarNetworkAddress}" FontSize="12"
+                       Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" />
+            <Border Background="{DynamicResource WarningSoftBrush}"
+                    BorderBrush="{DynamicResource WarningSoftBrush}" BorderThickness="1"
+                    CornerRadius="6" Padding="9,7" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="IPv4 controls" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource WarningBrush}" />
+                <TextBlock Text="Controls apply only to IPv4 traffic routed through this gateway."
+                           FontSize="11" Foreground="{DynamicResource WarningTextBrush}"
+                           TextWrapping="Wrap" Margin="0,3,0,0" />
+              </StackPanel>
+            </Border>
+            <Border Background="{DynamicResource WarningSoftBrush}" CornerRadius="6"
+                    Padding="9,7" Margin="0,10,0,0">
+              <StackPanel Orientation="Horizontal">
+                <Ellipse Width="7" Height="7" Fill="{DynamicResource WarningBrush}"
+                         Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="Session based" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource WarningBrush}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <Border Background="{DynamicResource AccentSoftBrush}"
+                  BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                  CornerRadius="8" Padding="11,9" Margin="18,0,18,14">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="7" Height="7" Fill="{DynamicResource AccentBrush}"
+                         VerticalAlignment="Center" />
+                <TextBlock Text="Local only" FontSize="12" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+              <TextBlock Text="Settings, profiles, and session history stay on this computer."
+                         FontSize="11" Foreground="{DynamicResource MutedBrush}"
+                         TextWrapping="Wrap" Margin="0,6,0,0" />
+            </StackPanel>
+          </Border>
+
+          <TextBlock Text="MANAGE" FontSize="11" FontWeight="SemiBold"
+                     Foreground="{DynamicResource MutedBrush}" Margin="23,0,0,10" />
+          <Border Width="212" Height="42" HorizontalAlignment="Center"
+                  Margin="12,0,12,4" Background="{DynamicResource AccentSoftBrush}" CornerRadius="7">
+            <Grid ColumnDefinitions="28,*,28">
+              <Border Background="{DynamicResource AccentBrush}" CornerRadius="0,2,2,0" />
+              <materialIcons:MaterialIcon Grid.Column="0" Kind="MonitorDashboard"
+                                          Width="18" Height="18"
+                                          Foreground="{DynamicResource SurfaceBrush}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="Devices" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{DynamicResource AccentBrush}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+          <Button Classes="nav" Click="SettingsNav_Click"
+                  Width="212" Height="42" HorizontalAlignment="Stretch"
+                  Margin="12,4,12,0" Padding="0">
+            <Grid ColumnDefinitions="28,*,28">
+              <materialIcons:MaterialIcon Grid.Column="0" Kind="CogOutline"
+                                          Width="18" Height="18"
+                                          Foreground="{DynamicResource MutedBrush}"
+                                          Margin="6,0,0,0"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="Settings" HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Grid>
+          </Button>
+          <Button Classes="nav" Click="HistoryNav_Click"
+                  Width="212" Height="42" HorizontalAlignment="Stretch"
+                  Margin="12,4,12,0" Padding="0">
+            <Grid ColumnDefinitions="28,*,28">
+              <materialIcons:MaterialIcon Grid.Column="0" Kind="History"
+                                          Width="18" Height="18"
+                                          Foreground="{DynamicResource MutedBrush}"
+                                          Margin="6,0,0,0"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="Session history" HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Grid>
+          </Button>
+          <Button Classes="nav" Click="DomainsNav_Click"
+                  Width="212" Height="42" HorizontalAlignment="Stretch"
+                  Margin="12,4,12,0" Padding="0">
+            <Grid ColumnDefinitions="28,*,28">
+              <materialIcons:MaterialIcon Grid.Column="0" Kind="Web"
+                                          Width="18" Height="18"
+                                          Foreground="{DynamicResource MutedBrush}"
+                                          Margin="6,0,0,0"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="Domains" HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Grid>
+          </Button>
+          <Button Classes="nav" Click="ChartNav_Click"
+                  Width="212" Height="42" HorizontalAlignment="Stretch"
+                  Margin="12,4,12,0" Padding="0">
+            <Grid ColumnDefinitions="28,*,28">
+              <materialIcons:MaterialIcon Grid.Column="0" Kind="ChartLine"
+                                          Width="18" Height="18"
+                                          Foreground="{DynamicResource MutedBrush}"
+                                          Margin="6,0,0,0"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="Live chart" HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Grid>
+          </Button>
+        </StackPanel>
+
+      </DockPanel>
+    </Border>
+
+    <Grid x:Name="MainContentGrid" Grid.Column="1" Margin="32,28,32,22"
+          RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+      <Grid Grid.Row="0" Margin="0,0,0,16" RowDefinitions="Auto,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+          <StackPanel>
+            <TextBlock Classes="page-title" Text="Network devices" />
+            <TextBlock Text="See devices on the Ethernet or Wi-Fi network used by this PC."
+                       FontSize="13" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="primary scan-button"
+                  Click="ScanButton_Click" IsEnabled="{Binding CanScan}">
+            <Grid ColumnDefinitions="18,*" ColumnSpacing="7">
+              <materialIcons:MaterialIcon Kind="Magnify" Width="16" Height="16"
+                                          Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="{Binding ScanButtonText}"
+                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                         VerticalAlignment="Center" />
+            </Grid>
+          </Button>
+        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0"
+                    VerticalAlignment="Center">
+          <TextBlock Text="ADAPTER" Classes="section-label" VerticalAlignment="Center" />
+          <ComboBox Width="300" Height="34" Margin="10,0,0,0"
+                    ItemsSource="{Binding Adapters}"
+                    SelectedItem="{Binding SelectedAdapter}"
+                    IsEnabled="{Binding CanScan}"
+                    SelectionChanged="AdapterComboBox_SelectionChanged"
+                    PlaceholderText="No IPv4 adapter found">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBlock x:Name="AdapterDiagnosticsBlock" Text="{Binding AdapterDiagnosticsText}" MaxWidth="760"
+                     FontSize="12" Foreground="{DynamicResource MutedBrush}"
+                     TextWrapping="Wrap" VerticalAlignment="Center" Margin="12,0,0,0" />
+        </StackPanel>
+      </Grid>
+
+      <Border Grid.Row="1" Classes="panel" Padding="14,11" Margin="0,0,0,10">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+          <StackPanel VerticalAlignment="Center">
+            <Border x:Name="CompactAuthorityCard" IsVisible="False"
+                    Background="{DynamicResource AccentSoftBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                    CornerRadius="7" Padding="9,8" Margin="0,0,0,8">
+              <CheckBox Foreground="{DynamicResource InkBrush}"
+                        IsChecked="{Binding IsNetworkAdminConfirmed, Mode=TwoWay}"
+                        IsEnabled="{Binding CanConfirmNetwork}">
+                <StackPanel>
+                  <TextBlock Text="I administer this network" FontSize="12"
+                             FontWeight="SemiBold"
+                             Foreground="{DynamicResource InkBrush}"
+                             Opacity="1" />
+                  <TextBlock Text="Authorize temporary IPv4 controls for selected devices."
+                             FontSize="11" Classes="muted" TextWrapping="Wrap"
+                             Margin="0,3,0,0" />
+                </StackPanel>
+              </CheckBox>
+            </Border>
+            <TextBlock Text="CONTROL SESSION" Classes="section-label" />
+            <Grid Margin="22,5,8,0" ColumnDefinitions="Auto,*" ColumnSpacing="7">
+              <Ellipse Width="7" Height="7" Fill="{DynamicResource AccentBrush}"
+                       VerticalAlignment="Top" Margin="0,5,0,0" />
+              <TextBlock Grid.Column="1" Text="{Binding SessionStatusText}" FontSize="12"
+                         Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" />
+            </Grid>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button Classes="quiet" Content="{Binding ApplySelectedText}" Click="ApplySelected_Click"
+                    MinWidth="156" Margin="12,0,8,0" IsEnabled="{Binding CanApplySelected}" />
+            <Button Classes="quiet" Content="Restore network" Click="RestoreButton_Click"
+                    Margin="12,0,8,0" IsEnabled="{Binding CanRestoreNetwork}" />
+            <Grid>
+              <Button Classes="primary" Content="Start control session"
+                      Click="ControlSessionButton_Click"
+                      IsVisible="{Binding !IsControlSessionActive}"
+                      IsEnabled="{Binding CanStartControlSession}" />
+              <Button Classes="quiet" Content="Stop control session"
+                      Click="ControlSessionButton_Click"
+                      IsVisible="{Binding IsControlSessionActive}"
+                      IsEnabled="{Binding CanStartControlSession}" />
+            </Grid>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Grid.Row="2" IsVisible="{Binding HasRemoteControls}"
+              Background="{DynamicResource DangerSoftBrush}"
+              BorderBrush="{DynamicResource DangerLineBrush}" BorderThickness="1"
+              CornerRadius="8" Padding="13,9" Margin="0,0,0,10">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+          <StackPanel>
+            <TextBlock Text="Controls active on this PC" FontSize="12" FontWeight="SemiBold"
+                       Foreground="{DynamicResource DangerBrush}" />
+            <TextBlock Text="{Binding RemoteControlSummaryText}" FontSize="12"
+                       Foreground="{DynamicResource WarningTextBrush}" TextWrapping="Wrap"
+                       Margin="0,3,15,0" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="quiet" Content="Remove controls"
+                  Foreground="{DynamicResource DangerBrush}" Click="RemoveRemoteControls_Click"
+                  Padding="10,7" />
+        </Grid>
+      </Border>
+
+      <Grid x:Name="MetricsGrid" Grid.Row="3" Margin="1,0,1,3" ColumnSpacing="0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="150" />
+          <ColumnDefinition Width="260" />
+          <ColumnDefinition Width="180" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+          <TextBlock Text="DEVICES VISIBLE" Classes="section-label" />
+          <TextBlock Text="{Binding DeviceCountText}" FontSize="13" FontWeight="SemiBold" Margin="0,3,0,0" />
+        </StackPanel>
+        <StackPanel x:Name="TrafficSummaryPanel" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,20,0">
+          <TextBlock Text="LIVE TRAFFIC RATE" Classes="section-label" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding TrafficSummaryText}" FontSize="13" FontWeight="SemiBold"
+                     Margin="0,3,0,0" IsVisible="{Binding !HasTrafficMetrics}" />
+          <StackPanel Orientation="Horizontal" Margin="0,3,0,0"
+                      IsVisible="{Binding HasTrafficMetrics}">
+            <Path Data="M3,0 H5 V6.6 L7,4.8 L8,5.8 L4,10 L0,5.8 L1,4.8 L3,6.6 Z"
+                  Fill="{DynamicResource DownloadBrush}" Width="7" Height="10"
+                  Stretch="Uniform" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding TrafficDownloadSummaryText}"
+                       Foreground="{DynamicResource DownloadBrush}" FontWeight="SemiBold" Margin="4,0,0,0" />
+            <TextBlock Text="·" Foreground="{DynamicResource MutedBrush}" Margin="8,0" />
+            <Path Data="M3,10 H5 V3.4 L7,5.2 L8,4.2 L4,0 L0,4.2 L1,5.2 L3,3.4 Z"
+                  Fill="{DynamicResource UploadBrush}" Width="7" Height="10"
+                  Stretch="Uniform" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding TrafficUploadSummaryText}"
+                       Foreground="{DynamicResource UploadBrush}" FontWeight="SemiBold" Margin="4,0,0,0" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,20,0">
+          <TextBlock Text="CONTROL ENGINE" Classes="section-label" />
+          <Grid Margin="0,3,0,0">
+            <TextBlock Text="{Binding EngineStatusText}" FontSize="13" FontWeight="SemiBold"
+                       Foreground="{DynamicResource GoodBrush}"
+                       IsVisible="{Binding IsEngineReady}" />
+            <TextBlock Text="{Binding EngineStatusText}" FontSize="13" FontWeight="SemiBold"
+                       Foreground="{DynamicResource WarningBrush}"
+                       IsVisible="{Binding !IsEngineReady}" />
+          </Grid>
+        </StackPanel>
+        <StackPanel x:Name="TrafficLegendPanel" Grid.Column="3" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,20,0">
+          <StackPanel Orientation="Horizontal">
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource DownloadBrush}"
+                     VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBlock Text="download" FontSize="11" Foreground="{DynamicResource DownloadBrush}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource UploadBrush}"
+                     VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBlock Text="upload" FontSize="11" Foreground="{DynamicResource UploadBrush}" />
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+
+      <Grid Grid.Row="4" Margin="0,0,0,4" Height="32" ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding StatusText}" FontSize="11"
+                   Foreground="{DynamicResource MutedBrush}" TextTrimming="CharacterEllipsis"
+                   VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="quiet" Content="Reset sorting"
+                Click="ResetDeviceSort_Click" IsEnabled="{Binding HasDeviceSort}"
+                Padding="8,0" Height="32" VerticalAlignment="Center"
+                VerticalContentAlignment="Center" />
+      </Grid>
+
+      <Border Grid.Row="5" Classes="panel" Padding="0" Margin="0">
+        <Grid RowDefinitions="0,*">
+          <Border Grid.Row="0" Background="{DynamicResource HeaderSurfaceBrush}"
+                  BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1"
+                  Padding="0">
+            <Grid ColumnDefinitions="60,1.55*,2.10*,1.45*,1.60*,2.20*">
+              <TextBlock Text="SELECT" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="IP ADDRESSES" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2" Text="MAC ADDRESS" Classes="section-label" Margin="14,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="3" Text="CURRENT RATE" Classes="section-label" Margin="5,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="4" Text="THIS SESSION" Classes="section-label" Margin="5,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="5" Text="CONTROL" Classes="section-label" Margin="8,0" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+          <Grid Grid.Row="1">
+            <ScrollViewer IsVisible="False"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding Devices}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1"
+                            Padding="0" MinHeight="70">
+                      <Grid ColumnDefinitions="60,1.55*,2.10*,1.45*,1.60*,2.20*">
+                        <CheckBox IsChecked="{Binding IsBulkSelected, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanConfigure}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,8">
+                          <TextBlock Text="{Binding AddressSummary}" FontSize="12"
+                                     TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding ProximitySummary}" FontSize="12"
+                                     Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0"
+                                     TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="14,8">
+                          <TextBlock Text="{Binding MacAddress}" FontSize="12" />
+                          <TextBox Text="{Binding Nickname, Mode=TwoWay}"
+                                   PlaceholderText="Name this device"
+                                   LostFocus="NicknameTextBox_LostFocus"
+                                   Width="138" Height="27" Margin="0,5,0,0"
+                                   HorizontalAlignment="Left" Padding="7,3"
+                                   FontSize="11" Background="{DynamicResource NicknameSurfaceBrush}"
+                                   BorderBrush="{DynamicResource NicknameBorderBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                    Margin="5,0">
+                          <Path Data="M3,0 H5 V6.6 L7,4.8 L8,5.8 L4,10 L0,5.8 L1,4.8 L3,6.6 Z"
+                                Fill="{DynamicResource DownloadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                          <TextBlock Text="{Binding DownloadRateText}" Foreground="{DynamicResource DownloadBrush}"
+                                     FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                          <TextBlock Text="·" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="7,0" />
+                          <Path Data="M3,10 H5 V3.4 L7,5.2 L8,4.2 L4,0 L0,4.2 L1,5.2 L3,3.4 Z"
+                                Fill="{DynamicResource UploadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                          <TextBlock Text="{Binding UploadRateText}" Foreground="{DynamicResource UploadBrush}"
+                                     FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center"
+                                    Margin="5,0">
+                          <Path Data="M3,0 H5 V6.6 L7,4.8 L8,5.8 L4,10 L0,5.8 L1,4.8 L3,6.6 Z"
+                                Fill="{DynamicResource DownloadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                          <TextBlock Text="{Binding DownloadSessionText}" Foreground="{DynamicResource DownloadBrush}"
+                                     FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                          <TextBlock Text="·" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="7,0" />
+                          <Path Data="M3,10 H5 V3.4 L7,5.2 L8,4.2 L4,0 L0,4.2 L1,5.2 L3,3.4 Z"
+                                Fill="{DynamicResource UploadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                          <TextBlock Text="{Binding UploadSessionText}" Foreground="{DynamicResource UploadBrush}"
+                                     FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                        </StackPanel>
+                        <Grid Grid.Column="5" Margin="8,0,16,0" ColumnDefinitions="*,Auto">
+                          <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                            <TextBlock Text="{Binding ControlSummary}" FontSize="12"
+                                       TextTrimming="CharacterEllipsis" IsVisible="{Binding HasControl}" />
+                            <TextBlock Text="{Binding ControlSummary}" FontSize="12"
+                                       Foreground="{DynamicResource MutedBrush}"
+                                       TextTrimming="CharacterEllipsis" IsVisible="{Binding !HasControl}" />
+                          </StackPanel>
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                            <Button Classes="quiet device-control-button" Content="{Binding ControlActionText}" Click="SetControls_Click" />
+                            <Button Classes="quiet" Content="Remove my control"
+                                    Click="RemoveMyControl_Click" IsVisible="{Binding IsRemoteControl}"
+                                    Padding="9,6" Foreground="{DynamicResource DangerBrush}" />
+                          </StackPanel>
+                        </Grid>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+            <DataGrid x:Name="DevicesGrid" IsVisible="{Binding HasDevices}"
+                      ItemsSource="{Binding Devices}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      ColumnHeaderHeight="44"
+                      RowHeight="78"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="True"
+                      Sorting="DevicesGrid_Sorting"
+                      Background="{DynamicResource SurfaceBrush}"
+                      Foreground="{DynamicResource InkBrush}"
+                      BorderThickness="0"
+                      HorizontalScrollBarVisibility="Hidden">
+              <DataGrid.Columns>
+                <DataGridTemplateColumn Width="60" CanUserSort="True" SortMemberPath="IsBulkSelected">
+                  <DataGridTemplateColumn.HeaderTemplate>
+                    <DataTemplate>
+                      <CheckBox IsThreeState="True"
+                                IsChecked="{Binding DataContext.IsAllEligibleSelected, Mode=TwoWay,
+                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                IsEnabled="{Binding DataContext.CanToggleBulkSelection,
+                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                ToolTip.Tip="Select or clear all eligible devices"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.HeaderTemplate>
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <CheckBox IsChecked="{Binding IsBulkSelected, Mode=TwoWay}"
+                                IsEnabled="{Binding CanConfigure}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="IP ADDRESSES" Width="1.55*"
+                                        SortMemberPath="IpAddressSortKey">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <StackPanel VerticalAlignment="Center" Margin="14,8">
+                        <TextBlock Text="{Binding AddressSummary}" FontSize="12" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding ProximitySummary}" FontSize="12"
+                                   Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0"
+                                   TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="MAC ADDRESS" Width="2.10*"
+                                        SortMemberPath="MacAddress">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <StackPanel VerticalAlignment="Center" Margin="14,8">
+                        <TextBlock Text="{Binding MacAddress}" FontSize="12" />
+                        <TextBox Text="{Binding Nickname, Mode=TwoWay}"
+                                 PlaceholderText="Name this device"
+                                 LostFocus="NicknameTextBox_LostFocus"
+                                 Width="138" Height="27" Margin="0,5,0,0"
+                                 HorizontalAlignment="Left" Padding="7,3"
+                                 FontSize="11" Background="{DynamicResource NicknameSurfaceBrush}"
+                                 BorderBrush="{DynamicResource NicknameBorderBrush}" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="CURRENT RATE" Width="1.45*"
+                                        SortMemberPath="CurrentRateSort">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                          <Path Data="M3,0 H5 V6.6 L7,4.8 L8,5.8 L4,10 L0,5.8 L1,4.8 L3,6.6 Z"
+                                Fill="{DynamicResource DownloadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding DownloadRateText}" Foreground="{DynamicResource DownloadBrush}"
+                                   FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                        <TextBlock Text="·" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="7,0" />
+                          <Path Data="M3,10 H5 V3.4 L7,5.2 L8,4.2 L4,0 L0,4.2 L1,5.2 L3,3.4 Z"
+                                Fill="{DynamicResource UploadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding UploadRateText}" Foreground="{DynamicResource UploadBrush}"
+                                   FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="THIS SESSION" Width="1.60*"
+                                        SortMemberPath="SessionTrafficSort">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                          <Path Data="M3,0 H5 V6.6 L7,4.8 L8,5.8 L4,10 L0,5.8 L1,4.8 L3,6.6 Z"
+                                Fill="{DynamicResource DownloadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding DownloadSessionText}" Foreground="{DynamicResource DownloadBrush}"
+                                   FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                        <TextBlock Text="·" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="7,0" />
+                          <Path Data="M3,10 H5 V3.4 L7,5.2 L8,4.2 L4,0 L0,4.2 L1,5.2 L3,3.4 Z"
+                                Fill="{DynamicResource UploadBrush}" Width="7" Height="10"
+                                Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding UploadSessionText}" Foreground="{DynamicResource UploadBrush}"
+                                   FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="CONTROL" Width="2.20*"
+                                        SortMemberPath="ControlSummary">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Grid Margin="8,0,16,0" ColumnDefinitions="*,Auto">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                          <TextBlock Text="{Binding ControlSummary}" FontSize="12"
+                                     TextTrimming="CharacterEllipsis" IsVisible="{Binding HasControl}" />
+                          <TextBlock Text="{Binding ControlSummary}" FontSize="12"
+                                     Foreground="{DynamicResource MutedBrush}"
+                                     TextTrimming="CharacterEllipsis" IsVisible="{Binding !HasControl}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                          <Button Classes="quiet device-control-button" Content="{Binding ControlActionText}" Click="SetControls_Click" />
+                          <Button Classes="quiet" Content="Remove my control"
+                                  Click="RemoveMyControl_Click" IsVisible="{Binding IsRemoteControl}"
+                                  Padding="9,6" Foreground="{DynamicResource DangerBrush}" />
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel IsVisible="{Binding HasNoDevices}" HorizontalAlignment="Center"
+                        VerticalAlignment="Center" MaxWidth="420" Margin="30,22">
+              <Border Width="54" Height="54" CornerRadius="27"
+                      Background="{DynamicResource AccentSoftBrush}"
+                      HorizontalAlignment="Center" Margin="0,0,0,18">
+                <Path Data="M5,8 H15 V16 H5 Z M15,12 H21 V20 H15 Z M10,16 V21 M8,21 H12"
+                      Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.7"
+                      Width="26" Height="26" Stretch="Uniform"
+                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <TextBlock Text="{Binding EmptyTitle}" FontSize="17" FontWeight="SemiBold"
+                         HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding EmptyDescription}"
+                         FontSize="12" Foreground="{DynamicResource MutedBrush}"
+                         TextAlignment="Center" TextWrapping="Wrap" Margin="8,8,8,17" />
+              <Button Classes="quiet" Content="{Binding ScanButtonText}" Click="ScanButton_Click"
+                      HorizontalAlignment="Center" IsEnabled="{Binding CanScan}" />
+            </StackPanel>
+          </Grid>
+        </Grid>
+      </Border>
+
+    </Grid>
+  </Grid>
+</Window>
