@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -13,9 +15,11 @@ namespace NetHog.Avalonia;
 public partial class SettingsDialog : Window, INotifyPropertyChanged
 {
     private readonly NetHogSettings _settings;
+    private readonly UpdateService _updateService = new();
     private string _historyRetentionValue;
     private string _validationText = string.Empty;
     private string _applyFeedbackText = string.Empty;
+    private string _updateCheckStatusText = string.Empty;
     private TrafficRateUnit _selectedRateUnit;
     private TrafficDataUnit _selectedDataUnit;
     private HistoryRetentionUnit _selectedRetentionUnit;
@@ -71,6 +75,7 @@ public partial class SettingsDialog : Window, INotifyPropertyChanged
     public string SettingsSubtitle => OperatingSystem.IsWindows()
         ? "Choose how NetHog behaves when Windows starts and when you close the window."
         : "Choose how NetHog behaves when your desktop session starts and when you close the window.";
+    public string AppVersionLabel => $"NetHog version {GetAppVersion()}";
     public TrafficRateUnit SelectedRateUnit { get => _selectedRateUnit; set => SetField(ref _selectedRateUnit, value); }
     public TrafficDataUnit SelectedDataUnit { get => _selectedDataUnit; set => SetField(ref _selectedDataUnit, value); }
     public HistoryRetentionUnit SelectedRetentionUnit { get => _selectedRetentionUnit; set => SetField(ref _selectedRetentionUnit, value); }
@@ -90,6 +95,9 @@ public partial class SettingsDialog : Window, INotifyPropertyChanged
         set => SelectedRetentionUnit = value == 0 ? HistoryRetentionUnit.Hours : HistoryRetentionUnit.Days;
     }
     public bool AutomaticUpdatesEnabled { get => _settings.AutomaticUpdatesEnabled; set { _settings.AutomaticUpdatesEnabled = value; OnPropertyChanged(); } }
+    public bool IsCheckingForUpdates { get; private set; }
+    public string UpdateButtonText => IsCheckingForUpdates ? "Checking for updates…" : "Check for updates";
+    public string UpdateCheckStatusText { get => _updateCheckStatusText; private set => SetField(ref _updateCheckStatusText, value); }
     public string StartupTitle => OperatingSystem.IsWindows()
         ? "Start NetHog with Windows"
         : "Start NetHog with the desktop session";
@@ -145,6 +153,42 @@ public partial class SettingsDialog : Window, INotifyPropertyChanged
         if (!TryBuildSettings(out var settings)) return;
         ApplyRequested?.Invoke(this, settings);
         ApplyFeedbackText = "Settings applied.";
+    }
+
+    private async void CheckForUpdates_Click(object? sender, RoutedEventArgs e)
+    {
+        IsCheckingForUpdates = true;
+        OnPropertyChanged(nameof(IsCheckingForUpdates));
+        OnPropertyChanged(nameof(UpdateButtonText));
+        UpdateCheckStatusText = "Checking the latest signed release…";
+
+        try
+        {
+            var update = await _updateService.CheckAsync();
+            if (update is null)
+            {
+                UpdateCheckStatusText = "NetHog is up to date.";
+                return;
+            }
+
+            UpdateCheckStatusText = $"NetHog {update.Version} is available.";
+            var dialog = new UpdateDialog(update);
+            var openRelease = await dialog.ShowDialog<bool>(this);
+            if (openRelease)
+            {
+                Process.Start(new ProcessStartInfo(update.ReleaseUrl) { UseShellExecute = true });
+            }
+        }
+        catch
+        {
+            UpdateCheckStatusText = "Could not check for updates. Check your connection and try again.";
+        }
+        finally
+        {
+            IsCheckingForUpdates = false;
+            OnPropertyChanged(nameof(IsCheckingForUpdates));
+            OnPropertyChanged(nameof(UpdateButtonText));
+        }
     }
 
     private void Save_Click(object? sender, RoutedEventArgs e)
@@ -216,6 +260,18 @@ public partial class SettingsDialog : Window, INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private static string GetAppVersion()
+    {
+        var assembly = typeof(SettingsDialog).Assembly;
+        var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(informational))
+        {
+            return informational.Split('+', 2)[0];
+        }
+
+        return assembly.GetName().Version?.ToString(3) ?? "unknown";
+    }
 
     private static string KeepAsciiDigits(string? value) =>
         new((value ?? string.Empty).Where(character => character is >= '0' and <= '9').ToArray());

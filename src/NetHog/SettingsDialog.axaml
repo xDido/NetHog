@@ -13,6 +13,8 @@
         <TextBlock Text="Settings" FontSize="24" FontWeight="SemiBold" />
         <TextBlock Text="{Binding SettingsSubtitle}"
                    Classes="muted" TextWrapping="Wrap" Margin="0,6,0,0" />
+        <TextBlock Text="{Binding AppVersionLabel}"
+                   Classes="muted" FontSize="12" Margin="0,8,0,0" />
       </StackPanel>
 
       <Grid Grid.Row="1" Margin="0,22,0,0" ColumnDefinitions="*,24,*">
@@ -138,6 +140,14 @@
                          FontSize="12" Classes="muted" TextWrapping="Wrap" Margin="0,5,0,0" />
             </StackPanel>
           </CheckBox>
+          <StackPanel Margin="22,10,0,0" Spacing="6">
+            <Button Classes="quiet" Content="{Binding UpdateButtonText}"
+                    Click="CheckForUpdates_Click"
+                    IsEnabled="{Binding !IsCheckingForUpdates}"
+                    HorizontalAlignment="Left" />
+            <TextBlock Text="{Binding UpdateCheckStatusText}"
+                       FontSize="12" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
 
           <TextBlock Text="Session history" FontWeight="SemiBold" Margin="0,24,0,0" />
           <TextBlock Text="Choose whether completed sessions are removed automatically as they age."
